@@ -17,8 +17,13 @@ classifiers = [
 
 ]
 license = {text = "Not open source"}
+requires-python = ">=3.9"
 dependencies = [
-  
+  "pandas",
+  "chardet",
+  "openpyxl",  # for Excel support
+  "pyarrow",   # for Parquet support
+  "rapidfuzz"
 ]
 
 [project.optional-dependencies]
