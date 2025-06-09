@@ -1,4 +1,4 @@
-from ..constants.constants import *
+from ..constants import *
 from fuzzywuzzy import process
 from typing import Dict, List, Tuple, Type
 
@@ -495,7 +495,7 @@ def calculate_weekly_loss_returns(df: pd.DataFrame,
 
 
 def pivot_data(df: pd.DataFrame, date_column=None,
-               id_columns=IDENTIFIER_COLUMNS,
+               id_columns=None,
                pivot_column=None) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Pivot the DataFrame to create weekly and daily loss returns tables.
@@ -548,7 +548,8 @@ def pivot_data(df: pd.DataFrame, date_column=None,
     return losses_week, losses_day
 
 
-def transform_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def transform_data(df: pd.DataFrame,
+                   **kwargs) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Full master transform function for entire ETL pipeline.
 
@@ -564,36 +565,73 @@ def transform_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
         - DataFrame with weekly loss returns.
         - DataFrame with daily loss returns.
     """
+    # 1️⃣ Validate schema
+    validate_data(
+        df,
+        required_columns=kwargs['required_columns'],
+        expected_col_types=kwargs['expected_col_types']
+    )
 
-    # 1️⃣ Validate schema & dtypes
-    validate_data(df)
+    # 2️⃣ Date coverage
+    df, dropped_dates = get_valid_date_coverage(
+        df,
+        date_column=kwargs['date_column'],
+        id_columns=kwargs['id_columns'],
+        expected_range=kwargs['expected_range']
+    )
 
-    # 2️⃣ Date coverage filtering
-    df, dropped_dates = get_valid_date_coverage(df)
-    print(f"📅 Dropped {len(dropped_dates)} stocks due to date coverage \
-          issues: {dropped_dates}")
+    # 3️⃣ Price completeness
+    df, dropped_completeness = filter_by_price(
+        df,
+        id_columns=kwargs['id_columns'],
+        price_columns=kwargs['price_columns'],
+        threshold_pct=kwargs['threshold_pct']
+    )
 
-    # 3️⃣ Price completeness filtering
-    df, dropped_completeness = filter_by_price(df)
-    print(f"💰 Dropped {len(dropped_completeness)} stocks due to price \
-          completeness issues: {dropped_completeness}")
+    # 4️⃣ Currency preference
+    df = apply_curcdd_preference(
+        df,
+        id_columns=kwargs['id_columns'],
+        curcdd_column=kwargs['curcdd_column'],
+        preference=kwargs['preference'],
+        price_columns=kwargs['price_columns']
+    )
 
-    # 4️⃣ Apply curcdd preference
-    df = apply_curcdd_preference(df)
+    # 5️⃣ Handle missing data
+    df = handle_missing_data(
+        df,
+        price_list=kwargs['price_list'],
+        id_columns=kwargs['id_columns']
+    )
 
-    # 5️⃣ Handle missing data filling
-    df = handle_missing_data(df)
+    # 6️⃣ Clean categoricals
+    df = clean_categorical_data(
+        df,
+        cat_columns=kwargs['cat_columns']
+    )
 
-    # 6️⃣ Clean categorical fields
-    df = clean_categorical_data(df)
+    # 7️⃣ Daily returns
+    df = calculate_daily_loss_returns(
+        df,
+        returns=kwargs['returns'],
+        id_columns=kwargs['id_columns']
+    )
 
-    # 7️⃣ Calculate daily returns
-    df = calculate_daily_loss_returns(df)
+    # 8️⃣ Weekly returns
+    df = calculate_weekly_loss_returns(
+        df,
+        date_column=kwargs['date_column'],
+        returns=kwargs['returns'],
+        id_columns=kwargs['id_columns'],
+        lag_days=kwargs['lag_days']
+    )
 
-    # 8️⃣ Calculate weekly returns
-    df = calculate_weekly_loss_returns(df)
-
-    # 9️⃣ Pivot final outputs
-    losses_week, losses_day = pivot_data(df)
+    # 9️⃣ Pivot final result
+    losses_week, losses_day = pivot_data(
+        df,
+        date_column=kwargs['date_column'],
+        id_columns=kwargs['id_columns'],
+        pivot_column=kwargs['pivot_column']
+    )
 
     return losses_week, losses_day

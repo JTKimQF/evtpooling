@@ -1,4 +1,4 @@
-from ..constants.constants import *
+from ..constants import *
 
 import chardet
 import csv
@@ -111,33 +111,50 @@ def basic_data_quality_check(df: pd.DataFrame, price_list: list[str] = None):
 
 
 def extract_file(file_path: str, sep_file: str = None,
-                 parse_dates_file: str = DATE_COLUMN, header_excel: int = None):
+                 parse_dates_file: str = DATE_COLUMN,
+                 header_excel: int = None,
+                 sample_size: int = 10000,
+                 price_list: list = None) -> pd.DataFrame:
     """Load a file (csv, xlsx, parquet) into a pandas DataFrame.
     If sep is None for CSV, auto-detect separator.
 
     Parameters
     ----------
     file_path : str
-         Path to the file to be loaded. Supported formats: .csv, .xlsx, .parquet.
-         (Default value = None)
+        Path to the file to be loaded. Supported formats: .csv, .xlsx, .parquet.
+        (Default value = None)
     sep : str, optional
-          Separator for CSV files. If None, the separator will be auto-detected.
-         (Default value = None)
+        Separator for CSV files. If None, the separator will be auto-detected.
+        (Default value = None)
     parse_dates : list of str, optional
-         List of column names to parse as dates. If None, no columns are parsed.
-         (Default value = None)
+        List of column names to parse as dates. If None, no columns are parsed.
+        (Default value = None)
+    header_excel : int, optional
+        Row number to use as the header for Excel files.
+        If None, the first row is used.
+        (Default value = None)
+    sample_size : int, optional
+        Number of bytes to read for encoding detection and separator detection.
+        (Default value = 10000)
+    price_list : list of str, optional
+        List of price columns to check for data quality.
+        If None, defaults to [PRICE_CLOSE_DAY, PRICE_CLOSE_HIGH, PRICE_CLOSE_LOW].
+        (Default value = None)
 
     Returns
     -------
     df : pandas.DataFrame
         DataFrame containing the loaded data.
     """
+    if price_list is None:
+        price_list = [PRICE_CLOSE_DAY, PRICE_CLOSE_HIGH, PRICE_CLOSE_LOW]
+
     try:
-        enconding_file = detect_encoding(file_path)
+        enconding_file = detect_encoding(file_path, sample_size=sample_size)
 
         if file_path.endswith('.csv'):
             if sep_file is None:
-                sep_file = detect_csv_seperator(file_path)
+                sep_file = detect_csv_seperator(file_path, sample_size=sample_size)
             df = pd.read_csv(file_path, sep=sep_file,
                              parse_dates=[parse_dates_file], encoding=enconding_file)
 
@@ -161,7 +178,7 @@ def extract_file(file_path: str, sep_file: str = None,
         validate_schema(df, REQUIRED_COLUMNS)
 
         # Basic_data_quality_check
-        basic_data_quality_check(df)
+        basic_data_quality_check(df, price_list=price_list)
 
         return df
 
