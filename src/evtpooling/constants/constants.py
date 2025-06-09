@@ -5,8 +5,8 @@ DATE_COLUMN = 'datadate'
 PRICE_CLOSE_DAY = 'prccd'
 PRICE_CLOSE_HIGH = 'prchd'
 PRICE_CLOSE_LOW = 'prcld'
-START_DATE = pd.Timestamp('2008-01-01')
-END_DATE = pd.Timestamp('2023-12-31')
+START_DATE = pd.Timestamp('2008-01-03')
+END_DATE = pd.Timestamp('2023-12-29')
 
 CAT_COLUMNS = ['costat', 'ggroup', 'gind', 'loc']
 EXPECTED_COLUMNS = ['gvkey', 'conm', 'iid', 'datadate', 'curcdd', 'cshtrd', 'prccd',

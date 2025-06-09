@@ -40,23 +40,16 @@ Example ETL usage:
 
 .. code-block:: python
 
-    from evtpooling.etl.transform import (
-        validate_data,
-        handle_missing_data,
-        clean_categorical_data,
-        calculate_daily_loss_returns,
-        calculate_weekly_loss_returns,
-        pivot_data
+    from evtpooling import (
+        extract_file,
+        transform_data,
+        load_file,
+        etl_pipeline
     )
 
-    # df = pd.read_csv(...)  # Load your raw input dataframe
+    # filepath = 'path/to/your/data.csv'
 
-    validate_data(df)
-    df = handle_missing_data(df)
-    df = clean_categorical_data(df)
-    df = calculate_daily_loss_returns(df)
-    df = calculate_weekly_loss_returns(df)
-    weekly_pivot, daily_pivot = pivot_data(df)
+    clean_df = etl_pipeline(filepath)
 
 Documentation
 -------------

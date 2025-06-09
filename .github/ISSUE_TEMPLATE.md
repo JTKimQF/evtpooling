@@ -1,6 +1,6 @@
-* evtpooling version:
-* Python version:
-* Operating System:
+* evtpooling version: 0.1.3
+* Python version: 3.12
+* Operating System: Windows 11
 
 ### Description
 

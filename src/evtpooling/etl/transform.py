@@ -109,7 +109,7 @@ def get_valid_date_coverage(
     if not valid_groups:
         print("⚠️ All stocks dropped after date coverage check.")
         raise ExtractError(f'No stocks have complete date coverage'
-                           f'between {start_expected} and {end_expected}.')
+                           f' between {start_expected} and {end_expected}.')
     else:
         print("✅ Stocks with valid date coverage found:", len(valid_groups))
 

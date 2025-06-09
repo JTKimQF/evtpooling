@@ -10,7 +10,9 @@ import pandas as pd
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 
-def etl_pipeline(file_path: str, **kwargs) -> pd.DataFrame:
+def etl_pipeline(file_path: str,
+                 save_file: bool = False,
+                 **kwargs) -> pd.DataFrame:
     """
     ETL pipeline to extract, transform, and load data from a file.
 
@@ -51,7 +53,9 @@ def etl_pipeline(file_path: str, **kwargs) -> pd.DataFrame:
         week_filepath = os.path.join(directory, "losses_week.xlsx")
         loaded_data = load_file(clean_data_week, week_filepath)
         logging.info("Successfully extracted, transformed and loaded data.")
-        os.remove(week_filepath)
+
+        if not save_file:
+            os.remove(week_filepath)
 
         return loaded_data
     # Handle exceptions, log messages
