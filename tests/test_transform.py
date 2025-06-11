@@ -34,7 +34,7 @@ def valid_df():
         'prchd': np.random.uniform(low=1.0, high=100.0, size=24).tolist(),
         'prcld': np.random.uniform(low=1.0, high=100.0, size=24).tolist(),
         'trfd': [1.0] * 24,
-        'ISIN': ['AAA'] * 24,
+        'isin': ['AAA'] * 24,
         'costat': ['A'] * 24,
         'ggroup': [10.0] * 24,
         'gind': [100.0] * 24,

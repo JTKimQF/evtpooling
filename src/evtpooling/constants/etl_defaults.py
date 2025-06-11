@@ -16,7 +16,7 @@ DEFAULT_TRANSFORM_KWARGS = {
     'id_columns': IDENTIFIER_COLUMNS,
     'expected_range': (START_DATE, END_DATE),
     'price_columns': [PRICE_CLOSE_DAY, PRICE_CLOSE_HIGH, PRICE_CLOSE_LOW],
-    'threshold_pct': 80.0,
+    'threshold_pct': 85.0,
     'curcdd_column': 'curcdd',
     'preference': 'EUR',
     'price_list': [PRICE_CLOSE_DAY, PRICE_CLOSE_HIGH, PRICE_CLOSE_LOW],

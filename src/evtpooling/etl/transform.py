@@ -41,6 +41,8 @@ def validate_data(df: pd.DataFrame,
     if missing_cols:
         raise ValueError(f'Missing required columns: {missing_cols}')
 
+    df.columns = df.columns.str.lower()  # Normalize column names to lowercase
+
     for col, expected_type in expected_col_types.items():
         if not np.issubdtype(df[col].dtype, expected_type):
             raise TypeError(f'Column {col} has wrong dtype: \
@@ -122,7 +124,7 @@ def filter_by_price(
         df: pd.DataFrame,
         id_columns: List[str] = None,
         price_columns: List[str] = None,
-        threshold_pct: float = 80.0) -> Tuple[pd.DataFrame, List[Tuple]]:
+        threshold_pct: float = 85.0) -> Tuple[pd.DataFrame, List[Tuple]]:
     """
     Filter stocks based on the completeness of price data in specified columns.
 
@@ -136,7 +138,7 @@ def filter_by_price(
         List of price columns to check for completeness.
         Defaults to [PRICE_CLOSE_DAY, PRICE_CLOSE_HIGH, PRICE_CLOSE_LOW].
     threshold_pct : float, optional
-        Percentage threshold for completeness. Defaults to 80.0.
+        Percentage threshold for completeness. Defaults to 85.0.
 
     Returns
     -------
@@ -168,8 +170,8 @@ def filter_by_price(
         for price_col in price_columns:
             completeness = group[price_col].notna().mean() * 100
             if completeness < threshold_pct:
-                dropped_stocks.append((name, f"Insufficient data in \
-                                       '{price_col}' ({completeness:.1f}% valid)"))
+                dropped_stocks.append((name, f"Insufficient data in"
+                                       f"{price_col}' ({completeness:.1f}% valid)"))
                 sufficient_data = False
                 break
 
@@ -238,11 +240,11 @@ def apply_curcdd_preference(df: pd.DataFrame, id_columns: List[str] = None,
     # Sort logic: prefer EUR, then highest completeness
     completeness_df['curcdd_preference'] = completeness_df[curcdd_column].ne(preference)
     completeness_df.sort_values(
-        by=['gvkey', 'iid', 'curcdd_preference', 'completeness'],
-        ascending=[True, True, True, False], inplace=True)
+        by=['gvkey', 'curcdd_preference', 'completeness'],
+        ascending=[True, True, False], inplace=True)
 
     # Select one per (gvkey, iid)
-    best_per_gvkey_iid = completeness_df.groupby(['gvkey', 'iid']).first().reset_index()
+    best_per_gvkey_iid = completeness_df.groupby(['gvkey']).first().reset_index()
 
     if best_per_gvkey_iid.empty:
         print("⚠️ No valid groups remaining after curcdd preference applied.")
@@ -311,7 +313,7 @@ def handle_missing_data(df: pd.DataFrame,
 
 def extract_clean_categories(df: pd.DataFrame,
                              column: str,
-                             threshold_pct: float = 1.0) -> List[str]:
+                             threshold_pct_cat: float = 1.0) -> List[str]:
     """
     Extracts frequent categories from a column by removing
     categories below the threshold percentage.
@@ -335,7 +337,7 @@ def extract_clean_categories(df: pd.DataFrame,
         raise ValueError(f"Column '{column}' not found in dataframe.")
 
     percentage = df[column].value_counts(normalize=True) * 100
-    frequent_categories = percentage[percentage >= threshold_pct].index.tolist()
+    frequent_categories = percentage[percentage >= threshold_pct_cat].index.tolist()
     frequent_categories = sorted(frequent_categories)
 
     return frequent_categories
@@ -398,7 +400,7 @@ def clean_categorical_data(df: pd.DataFrame,
     for col in cat_columns:
         df[col] = df[col].astype(str).str.strip(). \
             str.upper().str.replace(r'[^A-Z0-9]', '', regex=True)
-        clean_cat_list = extract_clean_categories(df, col, threshold_pct=1.0)
+        clean_cat_list = extract_clean_categories(df, col, threshold_pct_cat=1.0)
         col_series = df[col].copy()  # Safer to work on a copy to avoid modifying the original data
         comparing_categories(col_series, pd.Series(clean_cat_list), threshold=80)
         df[col] = col_series.astype('category')
