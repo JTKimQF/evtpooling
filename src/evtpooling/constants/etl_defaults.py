@@ -23,7 +23,7 @@ DEFAULT_TRANSFORM_KWARGS = {
     'cat_columns': CAT_COLUMNS,
     'returns': PRICE_CLOSE_DAY,
     'lag_days': 5,
-    'pivot_column': IDENTIFIER_COLUMNS[0]
+    'pivot_column': IDENTIFIER_COLUMNS
 }
 
 DEFAULT_LOAD_KWARGS = {

@@ -5,6 +5,7 @@ import tempfile
 import os
 
 from evtpooling import etl_pipeline
+from evtpooling.constants import *
 
 
 @pytest.fixture
@@ -52,8 +53,8 @@ def test_etl_pipeline_runs(valid_input_file):
     # We simply check that the output is still a dataframe
     assert isinstance(result_df, pd.DataFrame)
 
-    # Optionally: check that the pivot table column name becomes 'gvkey'
-    assert result_df.columns.name == 'gvkey'
+    # Optionally: check that the pivot table column name becomes equal to the IDENTIFIER_COLUMNS
+    assert list(result_df.columns.names) == IDENTIFIER_COLUMNS
 
 
 def test_etl_pipeline_invalid_file():

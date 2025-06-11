@@ -484,7 +484,7 @@ def calculate_weekly_loss_returns(df: pd.DataFrame,
     df_copy = df.copy()
     first_day_per_stock = df_copy.groupby(id_columns)[date_column].transform('first')
     df_copy['is_anchor_day'] = df_copy[date_column].dt.weekday == first_day_per_stock.dt.weekday
-    df_copy['anchor_close'] = df_copy['prccd'].where(df_copy['is_anchor_day'])
+    df_copy['anchor_close'] = df_copy[returns].where(df_copy['is_anchor_day'])
     df_copy['lagged_anchor_close'] = (
         df_copy.groupby(id_columns)['anchor_close'].transform(lambda x: x.shift(lag_days))
     )
@@ -523,10 +523,11 @@ def pivot_data(df: pd.DataFrame, date_column=None,
     if id_columns is None:
         id_columns = IDENTIFIER_COLUMNS
     if pivot_column is None:
-        pivot_column = id_columns[0]
+        pivot_column = id_columns
 
     # Safety: Check columns exist
-    required_columns = [date_column, pivot_column, 'daily_loss_returns', 'weekly_loss_returns']
+    required_columns = [date_column, 'daily_loss_returns', 'weekly_loss_returns'] + (
+        pivot_column if isinstance(pivot_column, list) else [pivot_column])
     for col in required_columns:
         if col not in df.columns:
             raise ValueError(f"Missing required column: {col}")
