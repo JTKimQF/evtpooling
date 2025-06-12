@@ -8,7 +8,7 @@ from .extract import extract_file
 from .load import load_file
 from .transform import transform_data
 
-logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def etl_pipeline(file_path: str, save_file: bool = False, **kwargs) -> pd.DataFrame:
@@ -61,3 +61,10 @@ def etl_pipeline(file_path: str, save_file: bool = False, **kwargs) -> pd.DataFr
     except Exception as e:
         logging.error(f"Pipeline failed with error: {e}")
         raise
+
+
+# Configure logging ONLY when run directly (not when imported)
+if __name__ == "__main__":
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s", level=logging.INFO
+    )
