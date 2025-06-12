@@ -1,11 +1,11 @@
-from evtpooling.constants import *
-from evtpooling import extract_file
-from evtpooling.etl.extract import ExtractError
-
-import pytest
-import pandas as pd
-import tempfile
 import os
+import tempfile
+
+import pandas as pd
+import pytest
+from evtpooling import extract_file
+from evtpooling.constants import *
+from evtpooling.etl.extract import ExtractError
 
 # Dynamically build header from EXPECTED_COLUMNS
 CSV_HEADER = ",".join(EXPECTED_COLUMNS)
@@ -25,7 +25,7 @@ def valid_csv_file():
 """
     # Create a temporary physical file, make it look like a CSV file, and ensure file survices
     # after with block but then is deleted afterwards
-    with tempfile.NamedTemporaryFile(mode='w+', suffix='.csv', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", delete=False) as f:
         f.write(content)
         f.seek(0)
         yield f.name  # yield allows the function to continue instead of return
@@ -35,13 +35,13 @@ def valid_csv_file():
 @pytest.fixture
 def invalid_schema_csv_file():
     # Remove 'cshtrd' to break schema
-    partial_columns = [col for col in REQUIRED_COLUMNS if col != 'prcld']
+    partial_columns = [col for col in REQUIRED_COLUMNS if col != "prcld"]
     header = ",".join(partial_columns)
 
     content = f"""{header}
 1,EUR,IID1,2024-01-01,randomA,110,90
 """
-    with tempfile.NamedTemporaryFile(mode='w+', suffix='.csv', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", delete=False) as f:
         f.write(content)
         f.seek(0)
         yield f.name
@@ -53,7 +53,7 @@ def invalid_date_csv_file():
     content = f"""{CSV_HEADER}
 1,CompanyA,IID1,INVALID_DATE,USD,1000,105,110,90,1.02,US000001,A,10,100,US
 """
-    with tempfile.NamedTemporaryFile(mode='w+', suffix='.csv', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", delete=False) as f:
         f.write(content)
         f.seek(0)
         yield f.name
@@ -65,7 +65,7 @@ def negative_price_csv_file():
     content = f"""{CSV_HEADER}
 1,CompanyA,IID1,2024-01-01,USD,1000,-105,110,90,1.02,US000001,A,10,100,US
 """
-    with tempfile.NamedTemporaryFile(mode='w+', suffix='.csv', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", delete=False) as f:
         f.write(content)
         f.seek(0)
         yield f.name
@@ -75,6 +75,7 @@ def negative_price_csv_file():
 # ---------------------------
 # Tests
 # ---------------------------
+
 
 def test_valid_csv_file(valid_csv_file):
     df = extract_file(valid_csv_file, parse_dates_file=DATE_COLUMN)

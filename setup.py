@@ -34,3 +34,10 @@ setup(
 # 1. Create a virtual environment: python -m venv venv-testpypi
 # 2. Activate the virtual environment: venv-testpypi\Scripts\Activate
 # 3. Install the package from Test PyPI: pip install --index-url https://test.pypi.org/simple/ --no-deps evtpooling
+
+# COMMITTING STEPS:
+# 1. git add .
+# 2. git commit -m "Update setup.py and package version"
+# 2a. git commit -m "skip lint" --no-verify if you want to skip linting
+# 2b. git log --oneline for a quick check of the commit history
+# 3. git push origin (insert branch name here)

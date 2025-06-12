@@ -1,14 +1,16 @@
-from ..constants import *
+import csv
 
 import chardet
-import csv
 import pandas as pd
+
+from ..constants import *
 
 
 # Define a custom exception for specific errors if certain
 # conditions are not met defined below
 class ExtractError(Exception):
     """Custom exception for errors during data extraction."""
+
     pass
 
 
@@ -28,14 +30,14 @@ def detect_encoding(file_path: str, sample_size: int = 10000) -> str:
     encoding : str
         Detected encoding of the file. If detection fails, returns 'utf-8'.
     """
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         raw = f.read(sample_size)
     result = chardet.detect(raw)
-    encoding = result['encoding']
-    cofindence = result['confidence']
+    encoding = result["encoding"]
+    cofindence = result["confidence"]
     print(f"Detected encoding: {encoding} with confidence {cofindence}")
 
-    return encoding or 'utf-8'
+    return encoding or "utf-8"
 
 
 def detect_csv_seperator(file_path: str, sample_size: int = 10000) -> str:
@@ -54,7 +56,7 @@ def detect_csv_seperator(file_path: str, sample_size: int = 10000) -> str:
     sep : str
         Detected separator character. If detection fails, returns ','.
     """
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding="utf-8") as f:
         sample = f.read(sample_size)
         try:
             dialect = csv.Sniffer().sniff(sample)
@@ -63,7 +65,7 @@ def detect_csv_seperator(file_path: str, sample_size: int = 10000) -> str:
             return sep
         except csv.Error:
             print("⚠ Sniffer failed, defaulting to ','")
-            return ','
+            return ","
 
 
 def validate_schema(df: pd.DataFrame, required_columns: list[str]):
@@ -84,7 +86,7 @@ def validate_schema(df: pd.DataFrame, required_columns: list[str]):
     """
     missing_cols = set(required_columns) - set(df.columns)
     if missing_cols:
-        raise ExtractError(f'Missing columns: {missing_cols}')
+        raise ExtractError(f"Missing columns: {missing_cols}")
 
 
 def basic_data_quality_check(df: pd.DataFrame, price_list: list[str] = None):
@@ -110,11 +112,14 @@ def basic_data_quality_check(df: pd.DataFrame, price_list: list[str] = None):
         raise ExtractError("Negative prices detected")
 
 
-def extract_file(file_path: str, sep_file: str = None,
-                 parse_dates_file: str = DATE_COLUMN,
-                 header_excel: int = None,
-                 sample_size: int = 10000,
-                 price_list: list = None) -> pd.DataFrame:
+def extract_file(
+    file_path: str,
+    sep_file: str = None,
+    parse_dates_file: str = DATE_COLUMN,
+    header_excel: int = None,
+    sample_size: int = 10000,
+    price_list: list = None,
+) -> pd.DataFrame:
     """Load a file (csv, xlsx, parquet) into a pandas DataFrame.
     If sep is None for CSV, auto-detect separator.
 
@@ -152,25 +157,30 @@ def extract_file(file_path: str, sep_file: str = None,
     try:
         enconding_file = detect_encoding(file_path, sample_size=sample_size)
 
-        if file_path.endswith('.csv'):
+        if file_path.endswith(".csv"):
             if sep_file is None:
                 sep_file = detect_csv_seperator(file_path, sample_size=sample_size)
-            df = pd.read_csv(file_path, sep=sep_file,
-                             parse_dates=[parse_dates_file], encoding=enconding_file)
+            df = pd.read_csv(
+                file_path,
+                sep=sep_file,
+                parse_dates=[parse_dates_file],
+                encoding=enconding_file,
+            )
 
-        elif file_path.endswith('.xlsx'):
-            df = pd.read_excel(file_path, parse_dates=[parse_dates_file],
-                               header=header_excel)
+        elif file_path.endswith(".xlsx"):
+            df = pd.read_excel(
+                file_path, parse_dates=[parse_dates_file], header=header_excel
+            )
 
-        elif file_path.endswith('.parquet'):
+        elif file_path.endswith(".parquet"):
             df = pd.read_parquet(file_path)
 
         else:
             raise ValueError("Unsupported file type.")
 
-        print(f'File loaded successfully: {file_path} wit hshape {df.shape}')
+        print(f"File loaded successfully: {file_path} with shape {df.shape}")
 
-        df[parse_dates_file] = pd.to_datetime(df[parse_dates_file], errors='coerce')
+        df[parse_dates_file] = pd.to_datetime(df[parse_dates_file], errors="coerce")
         if df[parse_dates_file].isnull().any():
             raise ExtractError("Some dates could not be parsed.")
 

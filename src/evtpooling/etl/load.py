@@ -1,11 +1,13 @@
 import pandas as pd
 
 
-def export_to_excel(df: pd.DataFrame,
-                    filepath: str,
-                    sheet_name: str = 'Sheet1',
-                    header: bool = True,
-                    index : bool = True) -> None:
+def export_to_excel(
+    df: pd.DataFrame,
+    filepath: str,
+    sheet_name: str = "Sheet1",
+    header: bool = True,
+    index: bool = True,
+) -> None:
     """
     Exports a DataFrame to an Excel file.
 
@@ -31,10 +33,9 @@ def export_to_excel(df: pd.DataFrame,
     print(f"✅ Excel file written: {filepath}")
 
 
-def export_to_csv(df: pd.DataFrame,
-                  filepath: str,
-                  header: bool = True,
-                  index: bool = True) -> None:
+def export_to_csv(
+    df: pd.DataFrame, filepath: str, header: bool = True, index: bool = True
+) -> None:
     """
     Exports a DataFrame to a CSV file.
 
@@ -58,9 +59,7 @@ def export_to_csv(df: pd.DataFrame,
     print(f"✅ CSV file written: {filepath}")
 
 
-def export_to_parquet(df: pd.DataFrame,
-                      filepath: str,
-                      index: bool = True) -> None:
+def export_to_parquet(df: pd.DataFrame, filepath: str, index: bool = True) -> None:
     """
     Exports a DataFrame to a Parquet file.
 
@@ -82,8 +81,7 @@ def export_to_parquet(df: pd.DataFrame,
     print(f"✅ Parquet file written: {filepath}")
 
 
-def export_to_pickle(df: pd.DataFrame,
-                     filepath: str) -> None:
+def export_to_pickle(df: pd.DataFrame, filepath: str) -> None:
     """
     Exports a DataFrame to a Pickle file.
 
@@ -103,12 +101,14 @@ def export_to_pickle(df: pd.DataFrame,
     print(f"✅ Pickle file written: {filepath}")
 
 
-def load_file(df: pd.DataFrame,
-              filepath: str,
-              file_format: str = 'xlsx',
-              sheet_name: str = 'Sheet1',
-              header: bool = True,
-              index: bool = True) -> pd.DataFrame:
+def load_file(
+    df: pd.DataFrame,
+    filepath: str,
+    file_format: str = "xlsx",
+    sheet_name: str = "Sheet1",
+    header: bool = True,
+    index: bool = True,
+) -> pd.DataFrame:
     """
     Loads a DataFrame to a specified file format.
 
@@ -134,13 +134,13 @@ def load_file(df: pd.DataFrame,
         The DataFrame that was written.
     """
 
-    if file_format == 'xlsx':
+    if file_format == "xlsx":
         export_to_excel(df, filepath, sheet_name=sheet_name, header=header, index=index)
-    elif file_format == 'csv':
+    elif file_format == "csv":
         export_to_csv(df, filepath, header=header, index=index)
-    elif file_format == 'parquet':
+    elif file_format == "parquet":
         export_to_parquet(df, filepath, index=index)
-    elif file_format == 'pickle':
+    elif file_format == "pickle":
         export_to_pickle(df, filepath)
     else:
         raise ValueError(f"Unsupported file format: {file_format}")

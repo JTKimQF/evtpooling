@@ -1,21 +1,25 @@
-from ..constants import *
-from fuzzywuzzy import process
 from typing import Dict, List, Tuple, Type
 
 import numpy as np
 import pandas as pd
+from fuzzywuzzy import process
+
+from ..constants import *
 
 
 # Define a custom exception for specific errors
 # if certain conditions are not met defined below
 class ExtractError(Exception):
     """Custom exception for errors during data extraction."""
+
     pass
 
 
-def validate_data(df: pd.DataFrame,
-                  required_columns: List[str] = None,
-                  expected_col_types: Dict[str, Type] = None) -> None:
+def validate_data(
+    df: pd.DataFrame,
+    required_columns: List[str] = None,
+    expected_col_types: Dict[str, Type] = None,
+) -> None:
     """
     Validate the DataFrame against expected columns and types.
 
@@ -39,23 +43,26 @@ def validate_data(df: pd.DataFrame,
     # Check for missing columns first
     missing_cols = [col for col in required_columns if col not in df.columns]
     if missing_cols:
-        raise ValueError(f'Missing required columns: {missing_cols}')
+        raise ValueError(f"Missing required columns: {missing_cols}")
 
     df.columns = df.columns.str.lower()  # Normalize column names to lowercase
 
     for col, expected_type in expected_col_types.items():
         if not np.issubdtype(df[col].dtype, expected_type):
-            raise TypeError(f'Column {col} has wrong dtype: \
-                            {df[col].dtype}, expected {expected_type}')
+            raise TypeError(
+                f"Column {col} has wrong dtype: \
+                            {df[col].dtype}, expected {expected_type}"
+            )
 
     print("✅ Data validation passed.")
 
 
 def get_valid_date_coverage(
-        df: pd.DataFrame,
-        date_column: str = None,
-        id_columns: List[str] = None,
-        expected_range: Tuple[str, str] = None) -> Tuple[pd.DataFrame, List[Tuple]]:
+    df: pd.DataFrame,
+    date_column: str = None,
+    id_columns: List[str] = None,
+    expected_range: Tuple[str, str] = None,
+) -> Tuple[pd.DataFrame, List[Tuple]]:
     """
     Filter stocks that have complete date coverage within the expected range.
 
@@ -93,7 +100,8 @@ def get_valid_date_coverage(
     end_expected = pd.to_datetime(expected_range[1])
 
     df_range = df[
-        (df[date_column] >= start_expected) & (df[date_column] <= end_expected)].copy()
+        (df[date_column] >= start_expected) & (df[date_column] <= end_expected)
+    ].copy()
 
     valid_groups = []
     dropped_stocks = []
@@ -110,8 +118,9 @@ def get_valid_date_coverage(
 
     if not valid_groups:
         print("⚠️ All stocks dropped after date coverage check.")
-        raise ExtractError(f'No stocks have complete date coverage'
-                           f' between {start_expected} and {end_expected}.')
+        raise ExtractError(
+            f"No stocks have complete date coverage between {start_expected} and {end_expected}."
+        )
     else:
         print("✅ Stocks with valid date coverage found:", len(valid_groups))
 
@@ -121,10 +130,11 @@ def get_valid_date_coverage(
 
 
 def filter_by_price(
-        df: pd.DataFrame,
-        id_columns: List[str] = None,
-        price_columns: List[str] = None,
-        threshold_pct: float = 85.0) -> Tuple[pd.DataFrame, List[Tuple]]:
+    df: pd.DataFrame,
+    id_columns: List[str] = None,
+    price_columns: List[str] = None,
+    threshold_pct: float = 85.0,
+) -> Tuple[pd.DataFrame, List[Tuple]]:
     """
     Filter stocks based on the completeness of price data in specified columns.
 
@@ -170,8 +180,12 @@ def filter_by_price(
         for price_col in price_columns:
             completeness = group[price_col].notna().mean() * 100
             if completeness < threshold_pct:
-                dropped_stocks.append((name, f"Insufficient data in"
-                                       f"{price_col}' ({completeness:.1f}% valid)"))
+                dropped_stocks.append(
+                    (
+                        name,
+                        f"Insufficient data in{price_col}' ({completeness:.1f}% valid)",
+                    )
+                )
                 sufficient_data = False
                 break
 
@@ -188,9 +202,13 @@ def filter_by_price(
     return valid_df, dropped_stocks
 
 
-def apply_curcdd_preference(df: pd.DataFrame, id_columns: List[str] = None,
-                            curcdd_column: str = 'curcdd', preference: str = 'EUR',
-                            price_columns: List[str] = None) -> pd.DataFrame:
+def apply_curcdd_preference(
+    df: pd.DataFrame,
+    id_columns: List[str] = None,
+    curcdd_column: str = "curcdd",
+    preference: str = "EUR",
+    price_columns: List[str] = None,
+) -> pd.DataFrame:
     """
     Apply preference for 'curcdd' column to select
     the best stock data based on completeness.
@@ -229,38 +247,51 @@ def apply_curcdd_preference(df: pd.DataFrame, id_columns: List[str] = None,
 
     # name is a tuple of id_columns, group is the DataFrame part for that group
     for name, group in df.groupby(id_columns):
-        completeness_scores = [group[price_col].notna().mean() * 100
-                               for price_col in price_columns]
+        completeness_scores = [
+            group[price_col].notna().mean() * 100 for price_col in price_columns
+        ]
         avg_completeness = sum(completeness_scores) / len(completeness_scores)
-        completeness_records.append({'gvkey': name[0], 'curcdd': name[1],
-                                     'iid': name[2], 'completeness': avg_completeness})
+        completeness_records.append(
+            {
+                "gvkey": name[0],
+                "curcdd": name[1],
+                "iid": name[2],
+                "completeness": avg_completeness,
+            }
+        )
 
     completeness_df = pd.DataFrame(completeness_records)
 
     # Sort logic: prefer EUR, then highest completeness
-    completeness_df['curcdd_preference'] = completeness_df[curcdd_column].ne(preference)
+    completeness_df["curcdd_preference"] = completeness_df[curcdd_column].ne(preference)
     completeness_df.sort_values(
-        by=['gvkey', 'curcdd_preference', 'completeness'],
-        ascending=[True, True, False], inplace=True)
+        by=["gvkey", "curcdd_preference", "completeness"],
+        ascending=[True, True, False],
+        inplace=True,
+    )
 
     # Select one per (gvkey, iid)
-    best_per_gvkey_iid = completeness_df.groupby(['gvkey']).first().reset_index()
+    best_per_gvkey_iid = completeness_df.groupby(["gvkey"]).first().reset_index()
 
     if best_per_gvkey_iid.empty:
         print("⚠️ No valid groups remaining after curcdd preference applied.")
     else:
-        print("✅ Best groups selected based on curcdd preference and completeness:",
-              len(best_per_gvkey_iid))
+        print(
+            "✅ Best groups selected based on curcdd preference and completeness:",
+            len(best_per_gvkey_iid),
+        )
 
-    valid_groups = list(best_per_gvkey_iid[id_columns].itertuples(index=False, name=None))
+    valid_groups = list(
+        best_per_gvkey_iid[id_columns].itertuples(index=False, name=None)
+    )
     final_df = df[df[id_columns].apply(tuple, axis=1).isin(valid_groups)]
 
     return final_df
 
 
-def handle_missing_data(df: pd.DataFrame,
-                        price_list: List[str] = None,
-                        id_columns: List[str] = None) -> pd.DataFrame:
+def handle_missing_data(
+    df: pd.DataFrame, price_list: List[str] = None, id_columns: List[str] = None
+) -> pd.DataFrame:
     """
     Handle missing dates in the price columns by filling NaN values with the mean of the group.
 
@@ -295,25 +326,28 @@ def handle_missing_data(df: pd.DataFrame,
     # Check identifier columns first
     missing_id_cols = [col for col in id_columns if col not in df.columns]
     if missing_id_cols:
-        raise ValueError(f'Missing required identifier columns: {missing_id_cols}')
+        raise ValueError(f"Missing required identifier columns: {missing_id_cols}")
 
     for price_col in price_list:
         if price_col not in df.columns:
-            raise ValueError(f'Missing required column: {price_col}')
+            raise ValueError(f"Missing required column: {price_col}")
 
         if not np.issubdtype(df[price_col].dtype, np.floating):
-            raise TypeError(f'Column {price_col} has wrong dtype: \
-                            {df[price_col].dtype}, expected float type')
+            raise TypeError(
+                f"Column {price_col} has wrong dtype: \
+                            {df[price_col].dtype}, expected float type"
+            )
 
-        df[price_col] = df.groupby(id_columns)[price_col]. \
-            transform(lambda x: x.fillna(x.mean()))
+        df[price_col] = df.groupby(id_columns)[price_col].transform(
+            lambda x: x.fillna(x.mean())
+        )
 
     return df
 
 
-def extract_clean_categories(df: pd.DataFrame,
-                             column: str,
-                             threshold_pct_cat: float = 1.0) -> List[str]:
+def extract_clean_categories(
+    df: pd.DataFrame, column: str, threshold_pct_cat: float = 1.0
+) -> List[str]:
     """
     Extracts frequent categories from a column by removing
     categories below the threshold percentage.
@@ -343,9 +377,9 @@ def extract_clean_categories(df: pd.DataFrame,
     return frequent_categories
 
 
-def comparing_categories(dirty_cat_list: pd.Series,
-                         clean_cat_list: List[str],
-                         threshold: int = 80) -> None:
+def comparing_categories(
+    dirty_cat_list: pd.Series, clean_cat_list: List[str], threshold: int = 80
+) -> None:
     """
     Compare dirty category names with clean category names and replace them based on a threshold.
 
@@ -372,8 +406,9 @@ def comparing_categories(dirty_cat_list: pd.Series,
                 dirty_cat_list.loc[dirty_cat_list == potential_matches[0]] = cat_clean
 
 
-def clean_categorical_data(df: pd.DataFrame,
-                           cat_columns: List[str] = None) -> pd.DataFrame:
+def clean_categorical_data(
+    df: pd.DataFrame, cat_columns: List[str] = None
+) -> pd.DataFrame:
     """
     Clean categorical data in the DataFrame by:
     - Stripping whitespace
@@ -398,19 +433,26 @@ def clean_categorical_data(df: pd.DataFrame,
         cat_columns = CAT_COLUMNS
 
     for col in cat_columns:
-        df[col] = df[col].astype(str).str.strip(). \
-            str.upper().str.replace(r'[^A-Z0-9]', '', regex=True)
+        df[col] = (
+            df[col]
+            .astype(str)
+            .str.strip()
+            .str.upper()
+            .str.replace(r"[^A-Z0-9]", "", regex=True)
+        )
         clean_cat_list = extract_clean_categories(df, col, threshold_pct_cat=1.0)
-        col_series = df[col].copy()  # Safer to work on a copy to avoid modifying the original data
+        col_series = df[
+            col
+        ].copy()  # Safer to work on a copy to avoid modifying the original data
         comparing_categories(col_series, pd.Series(clean_cat_list), threshold=80)
-        df[col] = col_series.astype('category')
+        df[col] = col_series.astype("category")
 
     return df
 
 
-def calculate_daily_loss_returns(df: pd.DataFrame,
-                                 returns: str = None,
-                                 id_columns: List[str] = None) -> pd.DataFrame:
+def calculate_daily_loss_returns(
+    df: pd.DataFrame, returns: str = None, id_columns: List[str] = None
+) -> pd.DataFrame:
     """
     Calculate percentage loss returns for a given DataFrame.
 
@@ -439,16 +481,20 @@ def calculate_daily_loss_returns(df: pd.DataFrame,
     if not np.issubdtype(df[returns].dtype, np.floating):
         raise TypeError(f"Column {returns} must be numeric")
 
-    df['daily_loss_returns'] = (-df.groupby(id_columns)[returns].pct_change().fillna(0) * 100)
+    df["daily_loss_returns"] = (
+        -df.groupby(id_columns)[returns].pct_change().fillna(0) * 100
+    )
 
     return df
 
 
-def calculate_weekly_loss_returns(df: pd.DataFrame,
-                                  date_column: str = None,
-                                  returns: str = None,
-                                  id_columns: List[str] = None,
-                                  lag_days: int = 5) -> pd.DataFrame:
+def calculate_weekly_loss_returns(
+    df: pd.DataFrame,
+    date_column: str = None,
+    returns: str = None,
+    id_columns: List[str] = None,
+    lag_days: int = 5,
+) -> pd.DataFrame:
     """
     Calculate weekly loss returns for a given DataFrame.
 
@@ -484,21 +530,28 @@ def calculate_weekly_loss_returns(df: pd.DataFrame,
             raise ValueError(f"Missing column: {col}")
 
     df_copy = df.copy()
-    first_day_per_stock = df_copy.groupby(id_columns)[date_column].transform('first')
-    df_copy['is_anchor_day'] = df_copy[date_column].dt.weekday == first_day_per_stock.dt.weekday
-    df_copy['anchor_close'] = df_copy[returns].where(df_copy['is_anchor_day'])
-    df_copy['lagged_anchor_close'] = (
-        df_copy.groupby(id_columns)['anchor_close'].transform(lambda x: x.shift(lag_days))
+    first_day_per_stock = df_copy.groupby(id_columns)[date_column].transform("first")
+    df_copy["is_anchor_day"] = (
+        df_copy[date_column].dt.weekday == first_day_per_stock.dt.weekday
     )
-    df['weekly_loss_returns'] = -((df_copy[returns] - df_copy['lagged_anchor_close'])
-                                  / df_copy['lagged_anchor_close']) * 100
+    df_copy["anchor_close"] = df_copy[returns].where(df_copy["is_anchor_day"])
+    df_copy["lagged_anchor_close"] = df_copy.groupby(id_columns)[
+        "anchor_close"
+    ].transform(lambda x: x.shift(lag_days))
+    df["weekly_loss_returns"] = (
+        -(
+            (df_copy[returns] - df_copy["lagged_anchor_close"])
+            / df_copy["lagged_anchor_close"]
+        )
+        * 100
+    )
 
     return df
 
 
-def pivot_data(df: pd.DataFrame, date_column=None,
-               id_columns=None,
-               pivot_column=None) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def pivot_data(
+    df: pd.DataFrame, date_column=None, id_columns=None, pivot_column=None
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Pivot the DataFrame to create weekly and daily loss returns tables.
 
@@ -528,8 +581,9 @@ def pivot_data(df: pd.DataFrame, date_column=None,
         pivot_column = id_columns
 
     # Safety: Check columns exist
-    required_columns = [date_column, 'daily_loss_returns', 'weekly_loss_returns'] + (
-        pivot_column if isinstance(pivot_column, list) else [pivot_column])
+    required_columns = [date_column, "daily_loss_returns", "weekly_loss_returns"] + (
+        pivot_column if isinstance(pivot_column, list) else [pivot_column]
+    )
     for col in required_columns:
         if col not in df.columns:
             raise ValueError(f"Missing required column: {col}")
@@ -537,10 +591,12 @@ def pivot_data(df: pd.DataFrame, date_column=None,
     # Ensure date column is datetime
     df[date_column] = pd.to_datetime(df[date_column])
 
-    losses_week = df.pivot_table(values='weekly_loss_returns',
-                                 index=date_column, columns=pivot_column)
-    losses_day = df.pivot_table(values='daily_loss_returns',
-                                index=date_column, columns=pivot_column)
+    losses_week = df.pivot_table(
+        values="weekly_loss_returns", index=date_column, columns=pivot_column
+    )
+    losses_day = df.pivot_table(
+        values="daily_loss_returns", index=date_column, columns=pivot_column
+    )
 
     # OPTIONAL: Sort the values in each column for better readability
     # losses_week_dict_sorted = {col: losses_week[col].dropna().sort_values()
@@ -551,8 +607,7 @@ def pivot_data(df: pd.DataFrame, date_column=None,
     return losses_week, losses_day
 
 
-def transform_data(df: pd.DataFrame,
-                   **kwargs) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def transform_data(df: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Full master transform function for entire ETL pipeline.
 
@@ -571,70 +626,63 @@ def transform_data(df: pd.DataFrame,
     # 1️⃣ Validate schema
     validate_data(
         df,
-        required_columns=kwargs['required_columns'],
-        expected_col_types=kwargs['expected_col_types']
+        required_columns=kwargs["required_columns"],
+        expected_col_types=kwargs["expected_col_types"],
     )
 
     # 2️⃣ Date coverage
     df, dropped_dates = get_valid_date_coverage(
         df,
-        date_column=kwargs['date_column'],
-        id_columns=kwargs['id_columns'],
-        expected_range=kwargs['expected_range']
+        date_column=kwargs["date_column"],
+        id_columns=kwargs["id_columns"],
+        expected_range=kwargs["expected_range"],
     )
 
     # 3️⃣ Price completeness
     df, dropped_completeness = filter_by_price(
         df,
-        id_columns=kwargs['id_columns'],
-        price_columns=kwargs['price_columns'],
-        threshold_pct=kwargs['threshold_pct']
+        id_columns=kwargs["id_columns"],
+        price_columns=kwargs["price_columns"],
+        threshold_pct=kwargs["threshold_pct"],
     )
 
     # 4️⃣ Currency preference
     df = apply_curcdd_preference(
         df,
-        id_columns=kwargs['id_columns'],
-        curcdd_column=kwargs['curcdd_column'],
-        preference=kwargs['preference'],
-        price_columns=kwargs['price_columns']
+        id_columns=kwargs["id_columns"],
+        curcdd_column=kwargs["curcdd_column"],
+        preference=kwargs["preference"],
+        price_columns=kwargs["price_columns"],
     )
 
     # 5️⃣ Handle missing data
     df = handle_missing_data(
-        df,
-        price_list=kwargs['price_list'],
-        id_columns=kwargs['id_columns']
+        df, price_list=kwargs["price_list"], id_columns=kwargs["id_columns"]
     )
 
     # 6️⃣ Clean categoricals
-    df = clean_categorical_data(
-        df,
-        cat_columns=kwargs['cat_columns']
-    )
+    df = clean_categorical_data(df, cat_columns=kwargs["cat_columns"])
 
     # 7️⃣ Daily returns
     df = calculate_daily_loss_returns(
-        df,
-        returns=kwargs['returns'],
-        id_columns=kwargs['id_columns']
+        df, returns=kwargs["returns"], id_columns=kwargs["id_columns"]
     )
 
     # 8️⃣ Weekly returns
     df = calculate_weekly_loss_returns(
         df,
-        date_column=kwargs['date_column'],
-        returns=kwargs['returns'],
-        id_columns=kwargs['id_columns'],
-        lag_days=kwargs['lag_days']
+        date_column=kwargs["date_column"],
+        returns=kwargs["returns"],
+        id_columns=kwargs["id_columns"],
+        lag_days=kwargs["lag_days"],
     )
 
     # 9️⃣ Pivot final result
     losses_week, losses_day = pivot_data(
         df,
-        date_column=kwargs['date_column'],
-        id_columns=kwargs['id_columns'],
-        pivot_column=kwargs['pivot_column']
+        date_column=kwargs["date_column"],
+        id_columns=kwargs["id_columns"],
+        pivot_column=kwargs["pivot_column"],
     )
 
     return losses_week, losses_day

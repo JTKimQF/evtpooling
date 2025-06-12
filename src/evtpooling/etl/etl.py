@@ -1,18 +1,17 @@
-from ..constants import *
-from .extract import extract_file
-from .transform import transform_data
-from .load import load_file
-
 import logging
 import os
+
 import pandas as pd
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+from ..constants import *
+from .extract import extract_file
+from .load import load_file
+from .transform import transform_data
+
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.DEBUG)
 
 
-def etl_pipeline(file_path: str,
-                 save_file: bool = False,
-                 **kwargs) -> pd.DataFrame:
+def etl_pipeline(file_path: str, save_file: bool = False, **kwargs) -> pd.DataFrame:
     """
     ETL pipeline to extract, transform, and load data from a file.
 
@@ -38,7 +37,9 @@ def etl_pipeline(file_path: str,
         extract_final = DEFAULT_EXTRACT_KWARGS.copy()
         extract_final.update(extract_kwargs)
 
-        transform_kwargs = {k: kwargs[k] for k in DEFAULT_TRANSFORM_KWARGS if k in kwargs}
+        transform_kwargs = {
+            k: kwargs[k] for k in DEFAULT_TRANSFORM_KWARGS if k in kwargs
+        }
         transform_final = DEFAULT_TRANSFORM_KWARGS.copy()
         transform_final.update(transform_kwargs)
 
@@ -60,5 +61,5 @@ def etl_pipeline(file_path: str,
         return loaded_data
     # Handle exceptions, log messages
     except Exception as e:
-        logging.error(f'Pipeline failed with error: {e}')
+        logging.error(f"Pipeline failed with error: {e}")
         raise
