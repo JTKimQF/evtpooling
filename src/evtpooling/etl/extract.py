@@ -185,4 +185,4 @@ def extract_file(file_path: str, sep_file: str = None,
     except ExtractError:
         raise
     except Exception as e:
-        raise RuntimeError(f"Failed to load file: {e}")
+        raise RuntimeError(f"Failed to load file: {e}") from e

@@ -2,7 +2,7 @@ import pandas as pd
 
 from evtpooling import etl_pipeline
 
-losses_week = etl_pipeline(r'C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\evtpooling\data\STOXX_complete_data.csv', save_file=True)
+losses_week = etl_pipeline(r'C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\venv\data\STOXX_complete_data.csv', save_file=True)
 
 gvkey_curcdd_iid_list = [
     (12673, 'EUR', '03W'), (14140, 'EUR', '01W'), (15181, 'EUR', '03W'), (15509, 'GBP', '02W'), (15545, 'GBP', '02W'),

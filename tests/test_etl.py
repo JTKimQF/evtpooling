@@ -59,5 +59,5 @@ def test_etl_pipeline_runs(valid_input_file):
 
 def test_etl_pipeline_invalid_file():
     """Test that ETL pipeline raises error when input file is missing."""
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError, match="Failed to load file"):
         etl_pipeline("non_existing_file.csv")
