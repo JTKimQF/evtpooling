@@ -37,9 +37,7 @@ def etl_pipeline(file_path: str, save_file: bool = False, **kwargs) -> pd.DataFr
         extract_final = DEFAULT_EXTRACT_KWARGS.copy()
         extract_final.update(extract_kwargs)
 
-        transform_kwargs = {
-            k: kwargs[k] for k in DEFAULT_TRANSFORM_KWARGS if k in kwargs
-        }
+        transform_kwargs = {k: kwargs[k] for k in DEFAULT_TRANSFORM_KWARGS if k in kwargs}
         transform_final = DEFAULT_TRANSFORM_KWARGS.copy()
         transform_final.update(transform_kwargs)
 

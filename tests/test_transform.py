@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+
 from evtpooling.constants import *
 from evtpooling.etl.transform import (
     ExtractError,
@@ -66,9 +67,7 @@ def valid_df():
 @pytest.fixture
 def invalid_schema_df():
     """Missing required columns"""
-    df = pd.DataFrame(
-        {"gvkey": [1], "iid": ["01W"], "datadate": pd.to_datetime(["2008-01-01"])}
-    )
+    df = pd.DataFrame({"gvkey": [1], "iid": ["01W"], "datadate": pd.to_datetime(["2008-01-01"])})
 
     return df
 

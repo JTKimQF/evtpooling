@@ -168,9 +168,7 @@ def extract_file(
             )
 
         elif file_path.endswith(".xlsx"):
-            df = pd.read_excel(
-                file_path, parse_dates=[parse_dates_file], header=header_excel
-            )
+            df = pd.read_excel(file_path, parse_dates=[parse_dates_file], header=header_excel)
 
         elif file_path.endswith(".parquet"):
             df = pd.read_parquet(file_path)

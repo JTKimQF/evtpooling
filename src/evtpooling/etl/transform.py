@@ -1,5 +1,3 @@
-from typing import Dict, List, Tuple, Type
-
 import numpy as np
 import pandas as pd
 from fuzzywuzzy import process
@@ -17,8 +15,8 @@ class ExtractError(Exception):
 
 def validate_data(
     df: pd.DataFrame,
-    required_columns: List[str] = None,
-    expected_col_types: Dict[str, Type] = None,
+    required_columns: list[str] = None,
+    expected_col_types: dict[str, type] = None,
 ) -> None:
     """
     Validate the DataFrame against expected columns and types.
@@ -27,7 +25,7 @@ def validate_data(
     ----------
     df : pd.DataFrame
         DataFrame to validate.
-    expected_col_types : Dict[str, Type], optional
+    expected_col_types : Dict[str, type], optional
         Dictionary mapping column names to expected data types.
 
     Raises
@@ -60,9 +58,9 @@ def validate_data(
 def get_valid_date_coverage(
     df: pd.DataFrame,
     date_column: str = None,
-    id_columns: List[str] = None,
-    expected_range: Tuple[str, str] = None,
-) -> Tuple[pd.DataFrame, List[Tuple]]:
+    id_columns: list[str] = None,
+    expected_range: tuple[str, str] = None,
+) -> tuple[pd.DataFrame, list[tuple]]:
     """
     Filter stocks that have complete date coverage within the expected range.
 
@@ -72,15 +70,15 @@ def get_valid_date_coverage(
         DataFrame containing stock data.
     date_column : str, optional
         Column name for date. Defaults to DATE_COLUMN.
-    id_columns : List[str], optional
+    id_columns : list[str], optional
         List of identifier columns to group by. Defaults to IDENTIFIER_COLUMNS.
-    expected_range : Tuple[str, str], optional
+    expected_range : tuple[str, str], optional
         Tuple containing start and end dates as strings.
         Defaults to (START_DATE, END_DATE).
 
     Returns
     -------
-    Tuple[pd.DataFrame, List[Tuple]]
+    tuple[pd.DataFrame, list[Tuple]]
         A tuple containing:
         - Filtered DataFrame with valid date coverage.
         - List of dropped stocks with reasons for dropping.
@@ -99,9 +97,7 @@ def get_valid_date_coverage(
     start_expected = pd.to_datetime(expected_range[0])
     end_expected = pd.to_datetime(expected_range[1])
 
-    df_range = df[
-        (df[date_column] >= start_expected) & (df[date_column] <= end_expected)
-    ].copy()
+    df_range = df[(df[date_column] >= start_expected) & (df[date_column] <= end_expected)].copy()
 
     valid_groups = []
     dropped_stocks = []
@@ -131,10 +127,10 @@ def get_valid_date_coverage(
 
 def filter_by_price(
     df: pd.DataFrame,
-    id_columns: List[str] = None,
-    price_columns: List[str] = None,
+    id_columns: list[str] = None,
+    price_columns: list[str] = None,
     threshold_pct: float = 85.0,
-) -> Tuple[pd.DataFrame, List[Tuple]]:
+) -> tuple[pd.DataFrame, list[tuple]]:
     """
     Filter stocks based on the completeness of price data in specified columns.
 
@@ -142,9 +138,9 @@ def filter_by_price(
     ----------
     df : pd.DataFrame
         DataFrame containing stock data.
-    id_columns : List[str], optional
+    id_columns : list[str], optional
         List of identifier columns to group by. Defaults to IDENTIFIER_COLUMNS.
-    price_columns : List[str], optional
+    price_columns : list[str], optional
         List of price columns to check for completeness.
         Defaults to [PRICE_CLOSE_DAY, PRICE_CLOSE_HIGH, PRICE_CLOSE_LOW].
     threshold_pct : float, optional
@@ -152,7 +148,7 @@ def filter_by_price(
 
     Returns
     -------
-    Tuple[pd.DataFrame, List[Tuple]]
+    tuple[pd.DataFrame, list[Tuple]]
         A tuple containing:
         - Filtered DataFrame with valid price data.
         - List of dropped stocks with reasons for dropping.
@@ -204,10 +200,10 @@ def filter_by_price(
 
 def apply_curcdd_preference(
     df: pd.DataFrame,
-    id_columns: List[str] = None,
+    id_columns: list[str] = None,
     curcdd_column: str = "curcdd",
     preference: str = "EUR",
-    price_columns: List[str] = None,
+    price_columns: list[str] = None,
 ) -> pd.DataFrame:
     """
     Apply preference for 'curcdd' column to select
@@ -217,13 +213,13 @@ def apply_curcdd_preference(
     ----------
     df : pd.DataFrame
         DataFrame containing stock data.
-    id_columns : List[str], optional
+    id_columns : list[str], optional
         List of identifier columns to group by. Defaults to IDENTIFIER_COLUMNS.
     curcdd_column : str, optional
         Column name for currency code. Defaults to 'curcdd'.
     preference : str, optional
         Preferred currency code to filter by. Defaults to 'EUR'.
-    price_columns : List[str], optional
+    price_columns : list[str], optional
         List of price columns to check for completeness.
         Defaults to [PRICE_CLOSE_DAY, PRICE_CLOSE_HIGH, PRICE_CLOSE_LOW].
 
@@ -247,9 +243,7 @@ def apply_curcdd_preference(
 
     # name is a tuple of id_columns, group is the DataFrame part for that group
     for name, group in df.groupby(id_columns):
-        completeness_scores = [
-            group[price_col].notna().mean() * 100 for price_col in price_columns
-        ]
+        completeness_scores = [group[price_col].notna().mean() * 100 for price_col in price_columns]
         avg_completeness = sum(completeness_scores) / len(completeness_scores)
         completeness_records.append(
             {
@@ -281,16 +275,14 @@ def apply_curcdd_preference(
             len(best_per_gvkey_iid),
         )
 
-    valid_groups = list(
-        best_per_gvkey_iid[id_columns].itertuples(index=False, name=None)
-    )
+    valid_groups = list(best_per_gvkey_iid[id_columns].itertuples(index=False, name=None))
     final_df = df[df[id_columns].apply(tuple, axis=1).isin(valid_groups)]
 
     return final_df
 
 
 def handle_missing_data(
-    df: pd.DataFrame, price_list: List[str] = None, id_columns: List[str] = None
+    df: pd.DataFrame, price_list: list[str] = None, id_columns: list[str] = None
 ) -> pd.DataFrame:
     """
     Handle missing dates in the price columns by filling NaN values with the mean of the group.
@@ -299,9 +291,9 @@ def handle_missing_data(
     ----------
     df : pd.DataFrame
         DataFrame containing the price data.
-    price_list : List[str], optional
+    price_list : list[str], optional
         List of price columns to fill NaN values for.
-    id_columns : List[str], optional
+    id_columns : list[str], optional
         List of identifier columns to group by when filling NaN values.
 
     Raises
@@ -338,16 +330,14 @@ def handle_missing_data(
                             {df[price_col].dtype}, expected float type"
             )
 
-        df[price_col] = df.groupby(id_columns)[price_col].transform(
-            lambda x: x.fillna(x.mean())
-        )
+        df[price_col] = df.groupby(id_columns)[price_col].transform(lambda x: x.fillna(x.mean()))
 
     return df
 
 
 def extract_clean_categories(
     df: pd.DataFrame, column: str, threshold_pct_cat: float = 1.0
-) -> List[str]:
+) -> list[str]:
     """
     Extracts frequent categories from a column by removing
     categories below the threshold percentage.
@@ -364,7 +354,7 @@ def extract_clean_categories(
 
     Returns
     -------
-    List[str]
+    list[str]
         List of frequent category labels.
     """
     if column not in df.columns:
@@ -378,7 +368,7 @@ def extract_clean_categories(
 
 
 def comparing_categories(
-    dirty_cat_list: pd.Series, clean_cat_list: List[str], threshold: int = 80
+    dirty_cat_list: pd.Series, clean_cat_list: list[str], threshold: int = 80
 ) -> None:
     """
     Compare dirty category names with clean category names and replace them based on a threshold.
@@ -406,9 +396,7 @@ def comparing_categories(
                 dirty_cat_list.loc[dirty_cat_list == potential_matches[0]] = cat_clean
 
 
-def clean_categorical_data(
-    df: pd.DataFrame, cat_columns: List[str] = None
-) -> pd.DataFrame:
+def clean_categorical_data(df: pd.DataFrame, cat_columns: list[str] = None) -> pd.DataFrame:
     """
     Clean categorical data in the DataFrame by:
     - Stripping whitespace
@@ -421,7 +409,7 @@ def clean_categorical_data(
     ----------
     df : pd.DataFrame
         The input DataFrame containing categorical columns to be cleaned.
-    cat_columns : List[str], optional
+    cat_columns : list[str], optional
         List of categorical columns to clean. If None, defaults to CAT_COLUMNS.
 
     Returns
@@ -434,16 +422,10 @@ def clean_categorical_data(
 
     for col in cat_columns:
         df[col] = (
-            df[col]
-            .astype(str)
-            .str.strip()
-            .str.upper()
-            .str.replace(r"[^A-Z0-9]", "", regex=True)
+            df[col].astype(str).str.strip().str.upper().str.replace(r"[^A-Z0-9]", "", regex=True)
         )
         clean_cat_list = extract_clean_categories(df, col, threshold_pct_cat=1.0)
-        col_series = df[
-            col
-        ].copy()  # Safer to work on a copy to avoid modifying the original data
+        col_series = df[col].copy()  # Safer to work on a copy to avoid modifying the original data
         comparing_categories(col_series, pd.Series(clean_cat_list), threshold=80)
         df[col] = col_series.astype("category")
 
@@ -451,7 +433,7 @@ def clean_categorical_data(
 
 
 def calculate_daily_loss_returns(
-    df: pd.DataFrame, returns: str = None, id_columns: List[str] = None
+    df: pd.DataFrame, returns: str = None, id_columns: list[str] = None
 ) -> pd.DataFrame:
     """
     Calculate percentage loss returns for a given DataFrame.
@@ -462,7 +444,7 @@ def calculate_daily_loss_returns(
         The input DataFrame containing price data.
     returns : str, optional
         The column name for returns calculation. Defaults to PRICE_CLOSE_DAY.
-    id_columns : List[str], optional
+    id_columns : list[str], optional
         List of identifier columns to group by when calculating returns.
         Defaults to IDENTIFIER_COLUMNS.
 
@@ -481,9 +463,7 @@ def calculate_daily_loss_returns(
     if not np.issubdtype(df[returns].dtype, np.floating):
         raise TypeError(f"Column {returns} must be numeric")
 
-    df["daily_loss_returns"] = (
-        -df.groupby(id_columns)[returns].pct_change().fillna(0) * 100
-    )
+    df["daily_loss_returns"] = -df.groupby(id_columns)[returns].pct_change().fillna(0) * 100
 
     return df
 
@@ -492,7 +472,7 @@ def calculate_weekly_loss_returns(
     df: pd.DataFrame,
     date_column: str = None,
     returns: str = None,
-    id_columns: List[str] = None,
+    id_columns: list[str] = None,
     lag_days: int = 5,
 ) -> pd.DataFrame:
     """
@@ -506,7 +486,7 @@ def calculate_weekly_loss_returns(
         The column name for date. Defaults to DATE_COLUMN.
     returns : str, optional
         The column name for returns calculation. Defaults to PRICE_CLOSE_DAY.
-    id_columns : List[str], optional
+    id_columns : list[str], optional
         List of identifier columns to group by when calculating returns.
         Defaults to IDENTIFIER_COLUMNS.
     lag_days : int, optional
@@ -531,18 +511,13 @@ def calculate_weekly_loss_returns(
 
     df_copy = df.copy()
     first_day_per_stock = df_copy.groupby(id_columns)[date_column].transform("first")
-    df_copy["is_anchor_day"] = (
-        df_copy[date_column].dt.weekday == first_day_per_stock.dt.weekday
-    )
+    df_copy["is_anchor_day"] = df_copy[date_column].dt.weekday == first_day_per_stock.dt.weekday
     df_copy["anchor_close"] = df_copy[returns].where(df_copy["is_anchor_day"])
-    df_copy["lagged_anchor_close"] = df_copy.groupby(id_columns)[
-        "anchor_close"
-    ].transform(lambda x: x.shift(lag_days))
+    df_copy["lagged_anchor_close"] = df_copy.groupby(id_columns)["anchor_close"].transform(
+        lambda x: x.shift(lag_days)
+    )
     df["weekly_loss_returns"] = (
-        -(
-            (df_copy[returns] - df_copy["lagged_anchor_close"])
-            / df_copy["lagged_anchor_close"]
-        )
+        -((df_copy[returns] - df_copy["lagged_anchor_close"]) / df_copy["lagged_anchor_close"])
         * 100
     )
 
@@ -551,7 +526,7 @@ def calculate_weekly_loss_returns(
 
 def pivot_data(
     df: pd.DataFrame, date_column=None, id_columns=None, pivot_column=None
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Pivot the DataFrame to create weekly and daily loss returns tables.
 
@@ -561,14 +536,14 @@ def pivot_data(
         The input DataFrame containing loss returns data.
     date_column : str, optional
         The column name for date. Defaults to DATE_COLUMN.
-    id_columns : List[str], optional
+    id_columns : list[str], optional
         List of identifier columns to pivot by. Defaults to IDENTIFIER_COLUMNS.
     pivot_column : str, optional
         The column name to pivot on. Defaults to the first identifier column in id_columns.
 
     Returns
     -------
-    Tuple[pd.DataFrame, pd.DataFrame]
+    tuple[pd.DataFrame, pd.DataFrame]
         A tuple containing:
         - DataFrame with weekly loss returns pivoted by date and identifier.
         - DataFrame with daily loss returns pivoted by date and identifier.
@@ -607,7 +582,7 @@ def pivot_data(
     return losses_week, losses_day
 
 
-def transform_data(df: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def transform_data(df: pd.DataFrame, **kwargs) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Full master transform function for entire ETL pipeline.
 
@@ -618,7 +593,7 @@ def transform_data(df: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, pd.DataFra
 
     Returns
     -------
-    Tuple[pd.DataFrame, pd.DataFrame]
+    tuple[pd.DataFrame, pd.DataFrame]
         A tuple containing:
         - DataFrame with weekly loss returns.
         - DataFrame with daily loss returns.
@@ -656,9 +631,7 @@ def transform_data(df: pd.DataFrame, **kwargs) -> Tuple[pd.DataFrame, pd.DataFra
     )
 
     # 5️⃣ Handle missing data
-    df = handle_missing_data(
-        df, price_list=kwargs["price_list"], id_columns=kwargs["id_columns"]
-    )
+    df = handle_missing_data(df, price_list=kwargs["price_list"], id_columns=kwargs["id_columns"])
 
     # 6️⃣ Clean categoricals
     df = clean_categorical_data(df, cat_columns=kwargs["cat_columns"])

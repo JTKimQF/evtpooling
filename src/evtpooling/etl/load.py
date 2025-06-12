@@ -33,9 +33,7 @@ def export_to_excel(
     print(f"✅ Excel file written: {filepath}")
 
 
-def export_to_csv(
-    df: pd.DataFrame, filepath: str, header: bool = True, index: bool = True
-) -> None:
+def export_to_csv(df: pd.DataFrame, filepath: str, header: bool = True, index: bool = True) -> None:
     """
     Exports a DataFrame to a CSV file.
 

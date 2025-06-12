@@ -4,6 +4,8 @@ evtpooling
 evtpooling contains the framework needed to improve tail risk forecasts through robust data cleaning, transformation, and loss return calculations.  
 It provides flexible ETL utilities for handling time series stock data, validating completeness, transforming data, and calculating daily and weekly loss returns.
 
+The ETL pipeline is now fully implemented and production-ready. The project structure, linting, formatting, and pre-commit tooling have been modernized using `pyproject.toml` and `pre-commit`, replacing legacy configs such as `setup.cfg`, `tox.ini`, and `.travis.yml`. The codebase adheres to a unified standard via Ruff, Black, and Mypy integration.
+
 Features
 --------
 
@@ -15,6 +17,9 @@ Features
 * Weekly loss return calculations with anchor logic
 * Flexible pivoting to generate wide-format datasets for downstream modeling
 * Clean architecture with separate transform and test modules
+* Centralized configuration in `pyproject.toml`
+* Pre-commit hooks for Ruff, Black, and formatting checks
+* GitHub Actions-compatible setup
 
 Installation
 ------------
