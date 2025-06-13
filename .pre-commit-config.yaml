@@ -25,7 +25,7 @@ repos:
   # Automatically updates rev: fields --> pre-commit autoupdate
   # MANUALLY RUN ALL CONFIGURED HOOKS --> pre-commit run --all-files
   # ORDER:
-  # 1. ruff check /src /tests (--fix)
+  # 1. ruff check src/ tests/ (--fix)
   # 2. ruff format src/ tests/ --check --diff 
   # 2a. ruff format src/ tests/
   # 3. git add .

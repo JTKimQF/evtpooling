@@ -40,7 +40,9 @@ def alpha_var_sing_plot(
     """
     stocks = losses.dropna().sort_values()
     alpha_hat_list, var_hat_list = get_alpha_var(stocks, k_values, threshold)
-    file_path = file_path.rstrip("/\\")
+
+    if file_path is not None:
+        file_path = file_path.rstrip("/\\")
 
     _, ax = plt.subplots(figsize=(10, 6))
     sns.set_style("whitegrid")
@@ -143,7 +145,7 @@ def alpha_var_agg_plot(
     plot_kwargs = {"data": df_alpha_var, "x": "k_values"}
 
     if dict_gvkey_conm is not None:
-        conmlist = [dict_gvkey_conm[gvkey] for gvkey in gvkey_list]
+        conmlist = [dict_gvkey_conm.get(gvkey, gvkey) for gvkey in gvkey_list]
         df_alpha_var["conm"] = conmlist
         plot_kwargs["hue"] = "conm"
         plot_kwargs["style"] = "conm"
@@ -260,7 +262,7 @@ def loss_return_plot(
 
             # Set title using gvkey mapping if available
             if isinstance(stock_id, tuple):
-                gvkey, iid, curcdd = stock_id
+                gvkey, curcdd, iid = stock_id
                 if dict_gvkey_conm is not None:
                     gvkey = dict_gvkey_conm.get(gvkey, gvkey)
                 ax.set_title(f"{gvkey} ({iid}) in {curcdd}")
