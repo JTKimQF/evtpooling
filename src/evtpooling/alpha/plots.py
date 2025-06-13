@@ -1,3 +1,4 @@
+import math
 import os
 
 import matplotlib.pyplot as plt
@@ -5,6 +6,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from evtpooling.constants import *
 from evtpooling.utils import get_alpha_var
 
 
@@ -119,12 +121,12 @@ def alpha_var_agg_plot(
     file_path = file_path.rstrip("/\\")
 
     # --- Estimate alpha and VaR for each stock ---
-    for stocks in losses.columns:
-        stocks_clean = losses[stocks].dropna().sort_values()
+    for stock_id in losses.columns:
+        stocks_clean = losses[stock_id].dropna().sort_values()
         alpha_hat, var_hat = get_alpha_var(stocks_clean, k_values, threshold)
         alpha_hat_list.extend(alpha_hat)
         var_hat_list.extend(var_hat)
-        gvkey = stocks[0] if isinstance(stocks, tuple) else stocks
+        gvkey = stock_id[0] if isinstance(stock_id, tuple) else stock_id
         gvkey_list.extend([gvkey] * len(k_values))
 
     # --- Construct DataFrame ---
@@ -200,3 +202,80 @@ def alpha_var_agg_plot(
         plt.savefig(os.path.join(file_path, "alpha_plot.png"))
 
     plt.show()
+
+
+def loss_return_plot(
+    losses: pd.DataFrame,
+    plots_per_batch: int = 12,
+    plot_width: float = 18.0,
+    plot_height: float = 3.5,
+    num_columns: int = 3,
+    dict_gvkey_conm: dict[int, str] = None,
+) -> None:
+    """
+    Plot loss return graphs in batches of `plots_per_batch`, maintaining standard 3-column layout.
+
+    Parameters:
+    ----------
+    losses : pd.DataFrame
+        A DataFrame containing loss returns indexed by date and with columns as stock identifiers.
+    plots_per_batch : int, optional
+        Number of plots to display in each batch. Default is 12.
+    plot_width : float, optional
+        Width of each plot in inches. Default is 18.0.
+    plot_height : float, optional
+        Height of each plot in inches as a function of the number of rows.
+        Default is 3.5.
+    num_columns : int, optional
+        Number of columns in the plot layout. Default is 3.
+    dict_gvkey_conm : dict[int, str], optional
+        A dictionary mapping stock identifiers (gvkeys) to company names (conms).
+        If provided, company names will be used in the plot titles. Default is None.
+
+    Returns:
+    -------
+    None
+        Displays the loss return plots in batches.
+    """
+    num_plots = losses.shape[1]
+    n_batches = math.ceil(num_plots / plots_per_batch)
+
+    for batch_idx in range(n_batches):
+        start = batch_idx * plots_per_batch
+        end = min(start + plots_per_batch, num_plots)
+
+        batch_columns = losses.columns[start:end]
+        n_batch_plots = len(batch_columns)
+        n_rows = math.ceil(n_batch_plots / num_columns)
+
+        _, axes = plt.subplots(n_rows, num_columns, figsize=(plot_width, plot_height * n_rows))
+        axes = axes.flatten()
+
+        for idx, stock_id in enumerate(batch_columns):
+            ax = axes[idx]
+            stocks_clean = losses[stock_id].dropna()
+
+            # Plot line
+            sns.lineplot(x=stocks_clean.index, y=stocks_clean.values, ax=ax, color="b")
+
+            # Set title using gvkey mapping if available
+            if isinstance(stock_id, tuple):
+                gvkey, iid, curcdd = stock_id
+                if dict_gvkey_conm is not None:
+                    gvkey = dict_gvkey_conm.get(gvkey, gvkey)
+                ax.set_title(f"{gvkey} ({iid}) in {curcdd}")
+            else:
+                gvkey = dict_gvkey_conm.get(stock_id, stock_id) if dict_gvkey_conm else stock_id
+                ax.set_title(f"{gvkey}")
+
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Loss Returns", color="b")
+            ax.tick_params(axis="x", rotation=45)
+            ax.tick_params(axis="y", color="b")
+
+        # Hide unused axes in the last batch
+        for i in range(n_batch_plots, len(axes)):
+            axes[i].axis("off")
+
+        plt.tight_layout()
+        plt.show()

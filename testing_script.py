@@ -1,23 +1,25 @@
 import numpy as np
 import pandas as pd
 
-from evtpooling import etl_pipeline, alpha_var_agg_plot, alpha_var_sing_plot
+from evtpooling import etl_pipeline, alpha_var_agg_plot, alpha_var_sing_plot, loss_return_plot
 
 losses_week = etl_pipeline(r'C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\venv\data\STOXX_complete_data.csv', save_file=True)
 
 gvkey_curcdd_iid_list = [
-    (12673, 'EUR', '03W'), (14140, 'EUR', '01W'), (15181, 'EUR', '03W'), (15509, 'GBP', '02W'), (15545, 'GBP', '02W'),
-    (15549, 'EUR', '01W'), (15552, 'EUR', '07W'), (15575, 'EUR', '01W'), (15576, 'EUR', '10W'), (15593, 'EUR', '04W'),
-    (15598, 'EUR', '03W'), (15600, 'DKK', '01W'), (15603, 'GBP', '01W'), (15617, 'EUR', '14W'), (15634, 'GBP', '02W'),
-    (15645, 'EUR', '10W'), (15654, 'EUR', '07W'), (15664, 'GBP', '02W'), (15703, 'EUR', '01W'), (15724, 'EUR', '01W'),
-    (15773, 'EUR', '01W'), (15782, 'GBP', '01W'), (15784, 'EUR', '01W'), (15804, 'EUR', '01W'), (15846, 'EUR', '05W'),
-    (15914, 'EUR', '07W'), (16281, 'EUR', '01W'), (16348, 'EUR', '09W'), (16349, 'CHF', '02W'), (16447, 'EUR', '01W'),
-    (23087, 'CHF', '01W'), (23848, 'EUR', '07W'), (23913, 'GBP', '01W'), (24563, 'EUR', '02W'), (24578, 'SEK', '01W'),
-    (24584, 'EUR', '01W'), (24826, 'DKK', '01W'), (270979, 'GBP', '01W'), (272817, 'EUR', '01W'), (274282, 'DKK', '01W'),
-    (274774, 'GBP', '01W'), (286879, 'EUR', '01W'), (62410, 'EUR', '01W'), (63120, 'EUR', '15W'), (63546, 'CHF', '08W'),
-    (63590, 'EUR', '02W'), (63759, 'EUR', '07W'), (200647, 'EUR', '01W'), (204825, 'EUR', '01W'), (205699, 'CHF', '04W'),
-    (209212, 'DKK', '01W'), (214659, 'EUR', '02W'), (223504, 'GBP', '01W'), (225081, 'EUR', '01W'), (227537, 'EUR', '02W'),
-    (227616, 'GBP', '01W'), (229039, 'GBP', '01W'), (241498, 'EUR', '01W'), (245436, 'EUR', '01W')
+    (12673, 'EUR', '03W'), (14140, 'EUR', '01W'), (15181, 'EUR', '03W'), (15509, 'GBP', '02W'), (15532, 'EUR', '04W'),
+    (15545, 'GBP', '02W'), (15549, 'EUR', '01W'), (15552, 'EUR', '07W'), (15575, 'EUR', '01W'), (15576, 'EUR', '01W'),
+    (15593, 'EUR', '01W'), (15598, 'EUR', '01W'), (15600, 'DKK', '01W'), (15603, 'GBP', '01W'), (15617, 'EUR', '04W'),
+    (15634, 'GBP', '02W'), (15645, 'EUR', '10W'), (15654, 'SEK', '06W'), (15664, 'GBP', '02W'), (15671, 'EUR', '04W'),
+    (15703, 'EUR', '01W'), (15724, 'EUR', '01W'), (15773, 'EUR', '01W'), (15782, 'GBP', '01W'), (15784, 'EUR', '01W'),
+    (15804, 'EUR', '01W'), (15846, 'EUR', '01W'), (15914, 'EUR', '01W'), (15929, 'GBP', '01W'), (16281, 'EUR', '01W'),
+    (16348, 'EUR', '03W'), (16349, 'CHF', '02W'), (16447, 'EUR', '01W'), (23087, 'CHF', '01W'), (23848, 'EUR', '02W'),
+    (23913, 'GBP', '01W'), (24563, 'EUR', '02W'), (24578, 'SEK', '01W'), (24584, 'EUR', '01W'), (24826, 'DKK', '01W'),
+    (62410, 'EUR', '01W'), (63120, 'EUR', '01W'), (63546, 'CHF', '08W'), (63590, 'EUR', '01W'), (63759, 'EUR', '01W'),
+    (200646, 'EUR', '01W'), (200647, 'EUR', '01W'), (204825, 'EUR', '01W'), (205699, 'CHF', '01W'), (209212, 'DKK', '01W'),
+    (214659, 'EUR', '02W'), (214881, 'SEK', '01W'), (220426, 'CHF', '01W'), (223504, 'GBP', '01W'), (225081, 'EUR', '01W'),
+    (227537, 'EUR', '01W'), (227616, 'GBP', '01W'), (229039, 'GBP', '01W'), (241498, 'EUR', '01W'), (245436, 'EUR', '01W'),
+    (254578, 'GBP', '01W'), (270979, 'GBP', '01W'), (272817, 'EUR', '01W'), (274282, 'DKK', '01W'), (274774, 'GBP', '01W'),
+    (286879, 'EUR', '01W')
 ]
 
 dict_gvkey_conm = {
@@ -55,7 +57,11 @@ alpha_var_agg_plot(losses = losses_week_best,
                    k_values=np.arange(10, 150, 2),
                    vline = 90, threshold = 0.99,
                    dict_gvkey_conm=dict_gvkey_conm, details_on=True)
-alpha_var_sing_plot(losses = losses_week_best[(15509, 'GBP', '02W')], 
+alpha_var_sing_plot(losses = losses_week_best[(63590, 'EUR', '01W')], 
                     k_values=np.arange(10, 150, 2),
                     file_path=file_path,
                     name = dict_gvkey_conm[15509])
+loss_return_plot(losses=losses_week_best,
+                 dict_gvkey_conm=dict_gvkey_conm,
+                 plots_per_batch=16,
+                 num_columns=4)
