@@ -68,7 +68,7 @@ def chenzhou(alpha_list: list[float], common_alpha: float, k_threshold: int) -> 
 
     alpha_array = np.array(alpha_list)
     chenzhou_statistic = np.max(k_threshold * (alpha_array / common_alpha - 1) ** 2)
-    x = chenzhou_statistic - 2 * np.log(len(alpha_list) + np.log(np.log(len(alpha_list))))
+    x = chenzhou_statistic - 2 * np.log(len(alpha_list)) + np.log(np.log(len(alpha_list)))
 
     chenzhou_p_value = 1 - np.exp(-(1 / np.sqrt(np.pi)) * np.exp(-x / 2))
 
