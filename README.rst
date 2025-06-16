@@ -15,6 +15,9 @@ Features
 * Categorical cleaning and fuzzy matching for string variables
 * Daily percentage loss return calculations
 * Weekly loss return calculations with anchor logic
+* Visualization of VaR and tail index metrics
+* Visualization of loss return distributions
+* Common tail index testing
 * Flexible pivoting to generate wide-format datasets for downstream modeling
 * Clean architecture with separate transform and test modules
 * Centralized configuration in `pyproject.toml`
@@ -55,6 +58,8 @@ Example ETL usage:
     # filepath = 'path/to/your/data.csv'
 
     clean_df = etl_pipeline(filepath)
+
+For further details check out the testing_script.py file
 
 Documentation
 -------------

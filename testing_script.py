@@ -14,12 +14,12 @@ from evtpooling import (
 )
 
 # === File paths ===
-file_path = r"C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\figures"
+file_path = r"..."
 
 
 # === ETL pipeline ===
 losses_week, losses_day = etl_pipeline(
-    r"C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\venv\data\STOXX_complete_data.csv",
+    r"...",
     return_day_data=True,
     save_file=True,
 )
