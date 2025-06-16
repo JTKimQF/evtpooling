@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def get_alpha_var(
-    losses: pd.Series, k_values: list[int], threshold: float
+    losses: pd.Series, k_values: np.ndarray | int, threshold: float = 0.99
 ) -> tuple[list[float], list[float]]:
     """
     Calculate the Hill estimator and Value at Risk (VaR) for given losses.
@@ -27,6 +27,9 @@ def get_alpha_var(
     # Initialize the list to store the sorted values
     var_hat_list = []
     alpha_hat_list = []
+
+    if isinstance(k_values, int):
+        k_values = [k_values]
 
     for k in k_values:
         top_k_logs = np.log(losses.iloc[-k:])  # Log of the largest k values

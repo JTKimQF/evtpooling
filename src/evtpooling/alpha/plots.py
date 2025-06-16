@@ -12,7 +12,7 @@ from evtpooling.utils import get_alpha_var
 
 def alpha_var_sing_plot(
     losses: pd.Series,
-    k_values: list[int],
+    k_values: np.ndarray,
     threshold: float = 0.99,
     name: str = "",
     file_path: str = None,
@@ -80,7 +80,7 @@ def alpha_var_sing_plot(
 
 def alpha_var_agg_plot(
     losses: pd.Series,
-    k_values: list[int],
+    k_values: np.ndarray,
     threshold: float = 0.99,
     vline: int = None,
     file_path: str = "",

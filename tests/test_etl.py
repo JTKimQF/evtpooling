@@ -8,6 +8,10 @@ import pytest
 from evtpooling import etl_pipeline
 from evtpooling.constants import *
 
+# --------------------
+# Fixtures (mock data)
+# --------------------
+
 
 @pytest.fixture
 def valid_input_file():
@@ -55,6 +59,11 @@ def valid_input_file():
     yield file_path
 
     os.remove(file_path)
+
+
+# --------------------
+# Tests
+# --------------------
 
 
 def test_etl_pipeline_runs(valid_input_file):

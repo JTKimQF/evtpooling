@@ -1,29 +1,38 @@
 import numpy as np
-import pandas as pd
 
 from evtpooling import (
-    etl_pipeline,
     alpha_var_agg_plot,
     alpha_var_sing_plot,
-    loss_return_plot, 
     autocorrelation_test,
+    chenzhou,
+    etl_pipeline,
+    get_alpha_dict,
+    loss_return_plot,
     normality_test,
-    stationarity_test
+    stationarity_test,
+    wald_test,
 )
 
- # === ETL pipeline ===
-losses_week, losses_day = etl_pipeline(r'C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\venv\data\STOXX_complete_data.csv',
-                                       return_day_data= True,
-                                       save_file=True)
+# === File paths ===
+file_path = r"C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\figures"
 
+
+# === ETL pipeline ===
+losses_week, losses_day = etl_pipeline(
+    r"C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\venv\data\STOXX_complete_data.csv",
+    return_day_data=True,
+    save_file=True,
+)
+
+# === Dictionary for gvkey to company name mapping ===
 dict_gvkey_conm = {
     12673: "BARCLAYS PLC", 24578: "SWEDBANK AB", 14140: "BANCO SANTANDER SA", 24584: "BANCA MONTE DEI PASCHI SIENA",
     15181: "BANCO BILBAO VIZCAYA ARGENTA", 24826: "TOPDANMARK AS", 15509: "HSBC HLDGS PLC", 28838: "CREDIT SUISSE GROUP",
     15522: "BANCO POPULAR ESPANOL", 62410: "ALPHA SERVICES AND HOLDINGS", 15532: "BNP PARIBAS", 63120: "AXA SA",
-    15545: "AVIVA PLC", 63546: "SWISS RE LTD", 15547: "NATIXIS", 63590: "BANK OF IRELAND GROUP PLC", 
+    15545: "AVIVA PLC", 63546: "SWISS RE LTD", 15547: "NATIXIS", 63590: "BANK OF IRELAND GROUP PLC",
     15549: "UNICREDIT SPA", 63759: "SCOR SE", 15552: "DANSKE BANK AS", 144496: "UBS GROUP AG",
-    15575: "COMMERZBANK AG", 200646: "BANCA POPOLARE DI SONDRIO", 15576: "DEUTSCHE BANK AG", 200647: "BPER BANCA SPA", 
-    15593: "MEDIOBANCA BANCA DI CREDITO", 200705: "DNB BANK ASA", 15598: "AEGON LTD", 204719: "KOMERCNI BANKA AS", 
+    15575: "COMMERZBANK AG", 200646: "BANCA POPOLARE DI SONDRIO", 15576: "DEUTSCHE BANK AG", 200647: "BPER BANCA SPA",
+    15593: "MEDIOBANCA BANCA DI CREDITO", 200705: "DNB BANK ASA", 15598: "AEGON LTD", 204719: "KOMERCNI BANKA AS",
     15600: "JYSKE BANK", 204825: "HANNOVER RUECK SE", 15603: "LEGAL & GEN GROUP PLC", 205699: "SWISS LIFE HOLDING",
     15617: "ING GROEP NV", 209212: "SYDBANK AS", 15634: "NATWEST GROUP PLC", 214659: "ERSTE GROUP BK AG",
     15645: "STANDARD CHARTERED PLC", 214881: "NORDEA BANK ABP", 15654: "SVENSKA HANDELSBANKEN", 220426: "ZURICH INSURANCE GROUP AG",
@@ -40,36 +49,61 @@ dict_gvkey_conm = {
 }
 
 
-# === IID assumption testing ===
-normality_test(losses_week, drop = True, dict_gvkey_conm=dict_gvkey_conm)
-autocorrelation_test(losses_week, drop = True, dict_gvkey_conm=dict_gvkey_conm)
-stationarity_test(losses_week, drop = True, dict_gvkey_conm=dict_gvkey_conm)
 
-normality_test(losses_day, drop = True, dict_gvkey_conm=dict_gvkey_conm)
-autocorrelation_test(losses_day, drop = True, dict_gvkey_conm=dict_gvkey_conm)
-stationarity_test(losses_day, drop = True, dict_gvkey_conm=dict_gvkey_conm)
+# === IID assumption testing ===
+normality_test(losses_week, drop=True, dict_gvkey_conm=dict_gvkey_conm)
+autocorrelation_test(losses_week, drop=True, dict_gvkey_conm=dict_gvkey_conm)
+stationarity_test(losses_week, drop=True, dict_gvkey_conm=dict_gvkey_conm)
+
+normality_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
+autocorrelation_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
+stationarity_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
 
 
 # === Losses dictionaries ===
 losses_week_dict = {col: losses_week[col].dropna() for col in losses_week.columns}
 losses_day_dict = {col: losses_day[col].dropna() for col in losses_day.columns}
 
-file_path = r'C:\Users\jkim595\OneDrive - KPMG\Documents\Thesis\figures'
+
+# # === Alpha & VaR Plots ===
+k_thresh = 80
+alpha_var_agg_plot(
+    losses=losses_week,
+    k_values=np.arange(10, 150, 2),
+    vline=k_thresh,
+    threshold=0.99,
+    dict_gvkey_conm=dict_gvkey_conm,
+    details_on=True,
+)
+alpha_var_agg_plot(
+    losses=losses_day,
+    k_values=np.arange(10, 600, 2),
+    vline=400,
+    threshold=0.99,
+    dict_gvkey_conm=dict_gvkey_conm,
+    details_on=True,
+)
+alpha_var_sing_plot(
+    losses=losses_week[(63590, "EUR", "01W")],
+    k_values=np.arange(10, 150, 2),
+    name=dict_gvkey_conm[15509],
+)
+loss_return_plot(
+    losses=losses_day, dict_gvkey_conm=dict_gvkey_conm, plots_per_batch=16, num_columns=4
+)
 
 
-# === Alpha & VaR Plots ===
-alpha_var_agg_plot(losses = losses_week,
-                   k_values=np.arange(10, 150, 2),
-                   vline = 90, threshold = 0.99,
-                   dict_gvkey_conm=dict_gvkey_conm, details_on=True)
-alpha_var_agg_plot(losses = losses_day,
-                   k_values=np.arange(10, 600, 2),
-                   vline = 400, threshold = 0.99,
-                   dict_gvkey_conm=dict_gvkey_conm, details_on=True)
-alpha_var_sing_plot(losses = losses_week[(63590, 'EUR', '01W')], 
-                    k_values=np.arange(10, 150, 2),
-                    name = dict_gvkey_conm[15509])
-loss_return_plot(losses=losses_day,
-                 dict_gvkey_conm=dict_gvkey_conm,
-                 plots_per_batch=16,
-                 num_columns=4)
+# === Common tail index testing ===
+alpha_dict = get_alpha_dict(losses_week, k_threshold=k_thresh)
+alpha_list = list(alpha_dict.values())
+mean_alpha = np.mean(alpha_list)
+
+chenzou_stat, chenzou_p_value = chenzhou(
+    alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
+)
+wald_stat, wald_p_value = wald_test(
+    losses=losses_week, alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
+)
+
+print(f"Chenzhou statistic: {chenzou_stat}, p-value: {chenzou_p_value}")
+print(f"Wald statistic: {wald_stat}, p-value: {wald_p_value}")

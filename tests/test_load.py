@@ -13,11 +13,20 @@ from evtpooling.etl.load import (
     load_file,
 )
 
+# --------------------
+# Fixtures (mock data)
+# --------------------
+
 
 @pytest.fixture
 def sample_df():
     """Sample dataframe for testing export functions."""
     return pd.DataFrame({"A": np.arange(5), "B": list("abcde"), "C": np.random.rand(5)})
+
+
+# --------------------
+# Tests
+# --------------------
 
 
 def test_export_to_excel(sample_df):
