@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 
 from evtpooling.constants import *
-from evtpooling.utils import get_alpha_var
+from evtpooling.utils import get_alpha_var_list
 
 
 def alpha_var_sing_plot(
@@ -39,7 +39,7 @@ def alpha_var_sing_plot(
         Displays the plot with the Hill estimator and VaR.
     """
     stocks = losses.dropna().sort_values()
-    alpha_hat_list, var_hat_list = get_alpha_var(stocks, k_values, threshold)
+    alpha_hat_list, var_hat_list = get_alpha_var_list(stocks, k_values, threshold)
 
     if file_path is not None:
         file_path = file_path.rstrip("/\\")
@@ -125,7 +125,7 @@ def alpha_var_agg_plot(
     # --- Estimate alpha and VaR for each stock ---
     for stock_id in losses.columns:
         stocks_clean = losses[stock_id].dropna().sort_values()
-        alpha_hat, var_hat = get_alpha_var(stocks_clean, k_values, threshold)
+        alpha_hat, var_hat = get_alpha_var_list(stocks_clean, k_values, threshold)
         alpha_hat_list.extend(alpha_hat)
         var_hat_list.extend(var_hat)
         gvkey = stock_id[0] if isinstance(stock_id, tuple) else stock_id

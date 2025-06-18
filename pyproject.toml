@@ -87,7 +87,7 @@ exclude = [
   ".tox",
   "docs"
 ]
-target-version = "py39"
+target-version = "py312"
 
 [tool.ruff.format]
 docstring-code-format = true

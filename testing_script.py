@@ -11,6 +11,9 @@ from evtpooling import (
     normality_test,
     stationarity_test,
     wald_test,
+    kmeans_clustering,
+    kmeans_plot,
+    kmeans_pooling
 )
 
 # === File paths ===
@@ -65,7 +68,7 @@ losses_week_dict = {col: losses_week[col].dropna() for col in losses_week.column
 losses_day_dict = {col: losses_day[col].dropna() for col in losses_day.columns}
 
 
-# # === Alpha & VaR Plots ===
+# === Alpha & VaR Plots ===
 k_thresh = 80
 alpha_var_agg_plot(
     losses=losses_week,
@@ -107,3 +110,19 @@ wald_stat, wald_p_value = wald_test(
 
 print(f"Chenzhou statistic: {chenzou_stat}, p-value: {chenzou_p_value}")
 print(f"Wald statistic: {wald_stat}, p-value: {wald_p_value}")
+
+
+# === KMeans Clustering ===
+df_pooling = kmeans_pooling(
+    losses=losses_week,
+    k_threshold=80,
+    num_clusters=4
+)
+print(df_pooling.iloc[:, :])
+
+kmeans_plot(
+    losses=losses_week,
+    k_threshold=80,
+    k_range=np.arange(1, 15),
+    plot_inertia=True
+)

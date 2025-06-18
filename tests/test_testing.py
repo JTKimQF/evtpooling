@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from evtpooling import chenzhou, get_alpha_dict, get_pairwise_df, wald_test
+from evtpooling import chenzhou, get_pairwise_df, wald_test
+from evtpooling.utils import get_alpha_dict
 
 
 @pytest.fixture

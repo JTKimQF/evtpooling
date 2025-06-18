@@ -2,41 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import chi2
 
-from evtpooling.utils import get_alpha_var
-
-
-def get_alpha_dict(losses: pd.DataFrame, k_threshold: int) -> dict[int:float]:
-    """
-    Calculate the Hill estimator (alpha) for each column in a DataFrame of losses.
-
-    Parameters:
-    ----------
-    losses : pd.DataFrame
-        A pandas DataFrame containing multiple series of loss values, indexed by stock identifiers.
-    k_threshold : int
-        The number of top losses to consider for the Hill estimator calculation.
-
-    Returns:
-    -------
-    dict
-        A dictionary where keys are stock identifiers and values are the Hill estimator values.
-    """
-    if k_threshold >= losses.shape[0]:
-        raise ValueError("k_threshold must be less than the number of observations.")
-
-    alpha_dict = {}
-
-    for losses_id in losses.columns:
-        losses_clean = losses[losses_id].dropna().sort_values()
-        alpha_hat, _ = get_alpha_var(losses_clean, k_threshold)
-
-        if isinstance(losses_id, tuple):
-            losses_id_dict = losses_id[0]
-        else:
-            losses_id_dict = losses_id
-        alpha_dict[losses_id_dict] = float(alpha_hat[0])
-
-    return alpha_dict
+from evtpooling.utils import get_alpha_var_list
 
 
 def chenzhou(alpha_list: list[float], common_alpha: float, k_threshold: int) -> tuple[float, float]:
@@ -104,7 +70,7 @@ def get_pairwise_df(losses: pd.DataFrame, k_threshold: int) -> pd.DataFrame:
     }
 
     quantiles = {
-        gvkey: get_alpha_var(losses1.sort_values(), k_threshold)[1][0]
+        gvkey: get_alpha_var_list(losses1.sort_values(), k_threshold)[1][0]
         for gvkey, losses1 in losses_dict.items()
     }
 
