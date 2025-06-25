@@ -7,6 +7,7 @@ PRICE_CLOSE_HIGH = "prchd"
 PRICE_CLOSE_LOW = "prcld"
 START_DATE = pd.Timestamp("2008-01-04")
 END_DATE = pd.Timestamp("2023-12-29")
+DEBUG = True
 
 CAT_COLUMNS = ["costat", "ggroup", "gind", "loc"]
 EXPECTED_COLUMNS = [

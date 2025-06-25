@@ -1,6 +1,7 @@
 from .constants import (
     CAT_COLUMNS,
     DATE_COLUMN,
+    DEBUG,
     END_DATE,
     EXPECTED_COL_TYPES,
     EXPECTED_COLUMNS,
@@ -34,4 +35,5 @@ __all__ = [
     "DEFAULT_TRANSFORM_KWARGS",
     "DEFAULT_LOAD_KWARGS",
     "ALL_ALLOWED_KWARGS",
+    "DEBUG",
 ]
