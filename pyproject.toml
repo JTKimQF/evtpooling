@@ -125,6 +125,7 @@ ignore = ["E203", "S101", "S301"]
 "test_transform.py" = ["F403", "F405"]
 "utils.py" = ["F401"]
 "hmix.py" = ["C901"]
+"rmtc.py" = ["C901"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10

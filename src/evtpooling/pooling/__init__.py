@@ -12,6 +12,7 @@ from .hmix import (
     state_probability,
 )
 from .kmeans import kmeans_clustering, kmeans_plot, kmeans_pooling
+from .rmtc import rmtc_pooling
 
 __all__ = [
     "ExtractError",
@@ -28,4 +29,5 @@ __all__ = [
     "kmeans_clustering",
     "kmeans_plot",
     "kmeans_pooling",
+    "rmtc_pooling",
 ]

@@ -11,10 +11,9 @@ from evtpooling import (
     normality_test,
     stationarity_test,
     wald_test,
-    kmeans_clustering,
     kmeans_plot,
     kmeans_pooling,
-    hmix_func
+    rmtc_pooling
 )
 
 # === File paths ===
@@ -59,42 +58,42 @@ normality_test(losses_week, drop=True, dict_gvkey_conm=dict_gvkey_conm)
 autocorrelation_test(losses_week, drop=True, dict_gvkey_conm=dict_gvkey_conm)
 stationarity_test(losses_week, drop=True, dict_gvkey_conm=dict_gvkey_conm)
 
-# normality_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
-# autocorrelation_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
-# stationarity_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
+normality_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
+autocorrelation_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
+stationarity_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
 
 
-# # === Losses dictionaries ===
-# losses_week_dict = {col: losses_week[col].dropna() for col in losses_week.columns}
-# losses_day_dict = {col: losses_day[col].dropna() for col in losses_day.columns}
+# === Losses dictionaries ===
+losses_week_dict = {col: losses_week[col].dropna() for col in losses_week.columns}
+losses_day_dict = {col: losses_day[col].dropna() for col in losses_day.columns}
 
 
 # === Alpha & VaR Plots ===
 k_thresh = 80
-# alpha_var_agg_plot(
-#     losses=losses_week,
-#     k_values=np.arange(10, 150, 2),
-#     vline=k_thresh,
-#     threshold=0.99,
-#     dict_gvkey_conm=dict_gvkey_conm,
-#     details_on=True,
-# )
-# alpha_var_agg_plot(
-#     losses=losses_day,
-#     k_values=np.arange(10, 600, 2),
-#     vline=400,
-#     threshold=0.99,
-#     dict_gvkey_conm=dict_gvkey_conm,
-#     details_on=True,
-# )
-# alpha_var_sing_plot(
-#     losses=losses_week[(63590, "EUR", "01W")],
-#     k_values=np.arange(10, 150, 2),
-#     name=dict_gvkey_conm[15509],
-# )
-# loss_return_plot(
-#     losses=losses_day, dict_gvkey_conm=dict_gvkey_conm, plots_per_batch=16, num_columns=4
-# )
+alpha_var_agg_plot(
+    losses=losses_week,
+    k_values=np.arange(10, 150, 2),
+    vline=k_thresh,
+    threshold=0.99,
+    dict_gvkey_conm=dict_gvkey_conm,
+    details_on=True,
+)
+alpha_var_agg_plot(
+    losses=losses_day,
+    k_values=np.arange(10, 600, 2),
+    vline=400,
+    threshold=0.99,
+    dict_gvkey_conm=dict_gvkey_conm,
+    details_on=True,
+)
+alpha_var_sing_plot(
+    losses=losses_week[(63590, "EUR", "01W")],
+    k_values=np.arange(10, 150, 2),
+    name=dict_gvkey_conm[15509],
+)
+loss_return_plot(
+    losses=losses_day, dict_gvkey_conm=dict_gvkey_conm, plots_per_batch=16, num_columns=4
+)
 
 
 # === Common tail index testing ===
@@ -102,37 +101,41 @@ alpha_dict = get_alpha_dict(losses_week, k_threshold=k_thresh)
 alpha_list = list(alpha_dict.values())
 mean_alpha = np.mean(alpha_list)
 
-# chenzou_stat, chenzou_p_value = chenzhou(
-#     alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
-# )
-# wald_stat, wald_p_value = wald_test(
-#     losses=losses_week, alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
-# )
+chenzou_stat, chenzou_p_value = chenzhou(
+    alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
+)
+wald_stat, wald_p_value = wald_test(
+    losses=losses_week, alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
+)
 
-# print(f"Chenzhou statistic: {chenzou_stat}, p-value: {chenzou_p_value}")
-# print(f"Wald statistic: {wald_stat}, p-value: {wald_p_value}")
+print(f"Chenzhou statistic: {chenzou_stat}, p-value: {chenzou_p_value}")
+print(f"Wald statistic: {wald_stat}, p-value: {wald_p_value}")
 
 
-# # === KMeans Clustering ===
-# df_pooling = kmeans_pooling(
-#     losses=losses_week,
-#     k_threshold=80,
-#     num_clusters=4
-# )
-# print(df_pooling.iloc[:, :])
+# === KMeans Clustering ===
+df_pooling_kmeans = kmeans_pooling(
+    losses=losses_week,
+    k_threshold=80,
+    num_clusters=4
+)
+print(df_pooling_kmeans.iloc[:, :])
 
-# kmeans_plot(
-#     losses=losses_week,
-#     k_threshold=80,
-#     k_range=np.arange(1, 15),
-#     plot_inertia=True
-# )
+kmeans_plot(
+    losses=losses_week,
+    k_threshold=80,
+    k_range=np.arange(1, 15),
+    plot_inertia=True
+)
 
 
 # === RMTC Clustering ===
-pi_list, phi_list = hmix_func(
-                        alpha_list=alpha_list,
-                        num_clusters=4,
-                        threshold=1e-4,
-                        max_iter=10
-                    )
+df_pooling_rmtc, beta_list = rmtc_pooling(
+    losses=losses_week,
+    k_threshold=80,
+    beta=([0.5, 0.5], [(1.5, 0.5), (2.5, 1.0)]),
+    threshold=1e-4,
+    max_iter=50
+)
+print(f"RMC Estimated parameters:\n")
+print(df_pooling_rmtc.iloc[:, :], "\n")
+print(f"Estimated parameters:\n{beta_list[-2]}")

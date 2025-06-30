@@ -11,7 +11,7 @@ def calculate_alpha_var(
     """
     Calculate the Hill estimator and Value at Risk (VaR) for given losses.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.Series
         A pandas Series containing the loss values.
@@ -20,7 +20,7 @@ def calculate_alpha_var(
     threshold : float
         The threshold for the Value at Risk calculation, typically between 0 and 1.
 
-    Returns:
+    Returns
     -------
     tuple
         A tuple containing:
@@ -47,7 +47,7 @@ def get_alpha_var_list(
     """
     Calculate the Hill estimator and Value at Risk (VaR) for given losses.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.Series
         A pandas Series containing the loss values.
@@ -56,7 +56,7 @@ def get_alpha_var_list(
     threshold : float
         The threshold for the Value at Risk calculation, typically between 0 and 1.
 
-    Returns:
+    Returns
     --------
     tuple
         A tuple containing two lists:
@@ -82,14 +82,14 @@ def get_alpha_dict(losses: pd.DataFrame, k_threshold: int) -> dict[int:float]:
     """
     Calculate the Hill estimator (alpha) for each column in a DataFrame of losses.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.DataFrame
         A pandas DataFrame containing multiple series of loss values, indexed by stock identifiers.
     k_threshold : int
         The number of top losses to consider for the Hill estimator calculation.
 
-    Returns:
+    Returns
     -------
     dict
         A dictionary where keys are stock identifiers and values are the Hill estimator values.
@@ -116,14 +116,14 @@ def get_var_dict(losses: pd.DataFrame, k_threshold: int) -> dict[int:float]:
     """
     Calculate the Value at Risk (VaR) for each column in a DataFrame of losses.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.DataFrame
         A pandas DataFrame containing multiple series of loss values, indexed by stock identifiers.
     k_threshold : int
         The number of top losses to consider for the VaR calculation.
 
-    Returns:
+    Returns
     -------
     dict
         A dictionary where keys are stock identifiers and values are the VaR estimates.

@@ -10,7 +10,7 @@ def chenzhou(alpha_list: list[float], common_alpha: float, k_threshold: int) -> 
     Perform the Chen & Zhou of common tail indices test to compare a list of Hill estimator values
     against a common alpha.
 
-    Parameters:
+    Parameters
     ----------
     alpha_list : list[float]
         A list of Hill estimator values (alpha) for different stocks.
@@ -19,7 +19,7 @@ def chenzhou(alpha_list: list[float], common_alpha: float, k_threshold: int) -> 
     k_threshold : int
         The number of top losses considered for the Hill estimator calculation.
 
-    Returns:
+    Returns
     -------
     tuple
         A tuple containing:
@@ -47,14 +47,14 @@ def get_pairwise_df(losses: pd.DataFrame, k_threshold: int) -> pd.DataFrame:
     This function computes the probability that two stocks exceed their respective Value at Risk
     at a given threshold.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.DataFrame
         A pandas DataFrame containing multiple series of loss values, indexed by stock identifiers.
     k_threshold : int
         The number of top losses to consider for the Hill estimator calculation.
 
-    Returns:
+    Returns
     -------
     pd.DataFrame
         A DataFrame where the index and columns are stock identifiers, and the values are the
@@ -100,7 +100,7 @@ def wald_test(
     """
     Wald test using tail co-exceedance covariance estimator for testing common tail index.
 
-    Parameters:
+    Parameters
     -----------
     losses : pd.DataFrame
         DataFrame of losses (columns are assets, rows are time).
@@ -111,7 +111,7 @@ def wald_test(
     k_threshold : int
         Number of order statistics used.
 
-    Returns:
+    Returns
     --------
     wald_statistic : float
         Test statistic.

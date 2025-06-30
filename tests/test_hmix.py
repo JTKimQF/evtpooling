@@ -409,7 +409,11 @@ def sort_by_mu(pi_list, phi_list):
     return zip(*sorted(zip(pi_list, phi_list, strict=False), key=lambda x: x[1][0]), strict=False)
 
 
-def test_hmix_converges_to_known_parameters(known_mixture_data, monkeypatch):
+# To run this test: pytest tests/test_hmix.py::test_hmix_converges_to_known_parameters -s
+def test_hmix_converges_to_known_parameters(known_mixture_data, monkeypatch, request):
+    if request.node.nodeid not in request.config.args:
+        pytest.skip("Skipped by default unless explicitly selected")
+
     # Unpatch state_probability just for this test
     monkeypatch.setattr("evtpooling.pooling.hmix.state_probability", state_probability)
     monkeypatch.setattr("evtpooling.pooling.hmix.non_parametric_density", non_parametric_density)

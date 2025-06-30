@@ -20,7 +20,7 @@ def normality_test(
     If the p-value > threshold, the null hypothesis of normality is not rejected.
     Optionally drop the stock from the DataFrame if it fails the test.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.DataFrame
         A pandas DataFrame containing multiple series of loss values, indexed by stock identifiers.
@@ -35,7 +35,7 @@ def normality_test(
         If provided, the names of companies that fail the test will be printed instead of gvkeys.
         Default is None.
 
-    Returns:
+    Returns
     -------
     None
         Prints the list of companies that failed to reject the null hypothesis of normality.
@@ -78,7 +78,7 @@ def autocorrelation_test(
     """
     Performs the Ljung-Box test of no autocorelation.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.DataFrame
         A pandas DataFrame containing multiple series of loss values, indexed by stock identifiers.
@@ -93,7 +93,7 @@ def autocorrelation_test(
         If provided, the names of companies that fail the test will be printed instead of gvkeys.
         Default is None.
 
-    Returns:
+    Returns
     -------
     None
         Prints the list of companies that reject the null hypothesis of no autocorrelation.
@@ -139,7 +139,7 @@ def stationarity_test(
     """
     Performs the Augmented Dickey-Fuller test for a unit root.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.DataFrame
         A pandas DataFrame containing multiple series of loss values, indexed by stock identifiers.
@@ -154,7 +154,7 @@ def stationarity_test(
         If provided, the names of companies that fail the test will be printed instead of gvkeys.
         Default is None.
 
-    Returns:
+    Returns
     -------
     None
         Prints the list of companies that failed to reject the null hypothesis of a unit root.

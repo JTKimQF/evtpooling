@@ -20,7 +20,7 @@ def alpha_var_sing_plot(
     """
     Plot the Hill estimator and Value at Risk (VaR) for a single series of losses in one plot.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.Series
         A pandas Series containing the loss values.
@@ -33,7 +33,7 @@ def alpha_var_sing_plot(
     file_path : str, optional
         The file path where the plot will be saved. If empty, the plot will not be saved.
 
-    Returns:
+    Returns
     -------
     None
         Displays the plot with the Hill estimator and VaR.
@@ -90,7 +90,7 @@ def alpha_var_agg_plot(
     """
     Plot the Hill estimator and Value at Risk for multiple series of losses in two separate plots.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.DataFrame
         A pandas DataFrame containing multiple series of loss values, indexed by stock identifiers.
@@ -110,7 +110,7 @@ def alpha_var_agg_plot(
         A dictionary mapping stock identifiers (gvkeys) to company names (conms).
         If provided, company names will be used in the plots. Default is None.
 
-    Returns:
+    Returns
     -------
     None
         Displays two plots: one for VaR and one for the Hill estimator (alpha).
@@ -217,7 +217,7 @@ def loss_return_plot(
     """
     Plot loss return graphs in batches of `plots_per_batch`, maintaining standard 3-column layout.
 
-    Parameters:
+    Parameters
     ----------
     losses : pd.DataFrame
         A DataFrame containing loss returns indexed by date and with columns as stock identifiers.
@@ -234,7 +234,7 @@ def loss_return_plot(
         A dictionary mapping stock identifiers (gvkeys) to company names (conms).
         If provided, company names will be used in the plot titles. Default is None.
 
-    Returns:
+    Returns
     -------
     None
         Displays the loss return plots in batches.

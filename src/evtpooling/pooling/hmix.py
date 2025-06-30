@@ -25,8 +25,8 @@ def state_probability(
     Calculate the state probability for a given value x and state index i
     using the parameters from a Gaussian Mixture Model (GMM).
 
-    Parameters:
-    ----------
+    Parameters
+    -----------
     x : float
         The value for which the state probability is calculated.
     i : int
@@ -37,7 +37,7 @@ def state_probability(
         - phi_list: A list of tuples, each containing the mean and standard deviation
           for the corresponding state.
 
-    Returns:
+    Returns
     -------
     float
         The state probability for the given value x and state index i.
@@ -133,7 +133,7 @@ def non_parametric_density(
     Compute the non-parametric density estimate at a point x using a Gaussian Mixture Model (GMM).
     This function uses the Epanechnikov kernel for density estimation.
 
-    Parameters:
+    Parameters
     ----------
     x : float
         The point at which to evaluate the density estimate.
@@ -150,7 +150,7 @@ def non_parametric_density(
     bandwidths : list[float]
         A list of bandwidths for each state, used in the non-parametric density estimation.
 
-    Returns:
+    Returns
     -------
     float
         The estimated density at point x. If the input list is empty, raises ZeroDivisionError.
@@ -212,7 +212,7 @@ def integrand_i(
     """
     Compute the integrand for the Gaussian Mixture Model (GMM) density function.
 
-    Parameters:
+    Parameters
     ----------
     x : float
         The value at which to evaluate the integrand.
@@ -231,7 +231,7 @@ def integrand_i(
     normal_params : tuple[float, float]
         A tuple containing the mean and standard deviation for the i-th component.
 
-    Returns:
+    Returns
     -------
     float
         The value of the integrand at x for state i.
@@ -270,7 +270,7 @@ def h_total_int(
     h_total_int computes the integral of the GMM density function
     for the i-th component over the specified bounds.
 
-    Parameters:
+    Parameters
     ----------
     alpha_list : list[float]
         A list of values at which the density is estimated.
@@ -288,7 +288,7 @@ def h_total_int(
     plot : bool, optional
         If True, plots the integrand function for the i-th component.
 
-    Returns:
+    Returns
     -------
     float
         The value of the integral for the i-th component.
@@ -355,7 +355,7 @@ def h_theta(
     """
     Compute the value of h(theta) for the Gaussian Mixture Model (GMM).
 
-    Parameters:
+    Parameters
     ----------
     alpha_list : list[float]
         A list of values at which the density is estimated.
@@ -364,8 +364,10 @@ def h_theta(
         - pi_list: A list of mixing coefficients for each state.
         - phi_list: A list of tuples, each containing the mean and standard deviation
           for the corresponding state.
+    bounds : tuple[float, float], optional
+        The bounds for the integration. If None, defaults to (min(alpha_list), max(alpha_list)).
 
-    Returns:
+    Returns
     -------
     float
         The value of h(theta), which is the integral of the GMM density function
@@ -414,7 +416,7 @@ def optimize_phi_i(
     Optimize the parameters (mu, sigma) for the i-th component of the Gaussian Mixture Model (GMM)
     using the h_theta function.
 
-    Parameters:
+    Parameters
     ----------
     i : int
         The index of the component to optimize.
@@ -425,8 +427,13 @@ def optimize_phi_i(
         - pi_list: A list of mixing coefficients for each state.
         - phi_list: A list of tuples, each containing the mean and standard deviation
             for the corresponding state.
+    bounds_arg : tuple[float, float], optional
+        The bounds for the optimization of mu_i and sigma_i. Default is (0, max(alpha_list)).
+    plot : bool, optional
+        If True, plots a 3D graph of the integrand function for the
+        i-th component during optimization.
 
-    Returns:
+    Returns
     -------
     tuple[float, float]
         The optimized parameters (mu_i*, sigma_i*) for the i-th component.
@@ -537,7 +544,7 @@ def optimize_pi_i(
     Optimize the mixing coefficient pi_i for the i-th component of the Gaussian Mixture Model (GMM)
     using the h_total_int function.
 
-    Parameters:
+    Parameters
     ----------
     i : int
         The index of the component for which to optimize the mixing coefficient.
@@ -548,10 +555,13 @@ def optimize_pi_i(
         - pi_list: A list of mixing coefficients for each state.
         - phi_list: A list of tuples, each containing the mean and standard deviation
             for the corresponding state.
+    normal_params_list : list[tuple[float, float]]
+        A list of tuples, each containing the mean and standard deviation
+        for the corresponding component in the GMM.
     bounds : tuple[float, float], optional
         The bounds for the optimization of pi_i. Default is (1.0, 10.0).
 
-    Returns:
+    Returns
     -------
     float
         The optimized mixing coefficient pi_i* for the i-th component.
@@ -581,14 +591,14 @@ def hmix_func(
     num_clusters: int,
     theta: tuple[list[float], list[tuple[float, float]]] = None,
     threshold: float = 1e-6,
-    max_iter: int = 1000,
+    max_iter: int = 50,
     bounds_int: tuple[float, float] = None,
     plot: bool = False,
 ) -> tuple[list[float], list[tuple[float, float]]]:
     """
     Perform hierarchical mixture optimization on the given parameters.
 
-    Parameters:
+    Parameters
     ----------
     alpha_list : list[float]
         A list of values at which the density is estimated.
@@ -603,8 +613,12 @@ def hmix_func(
         The convergence threshold for the optimization. Default is 1e-6.
     max_iter : int, optional
         The maximum number of iterations for the optimization. Default is 1000.
+    bounds_int : tuple[float, float], optional
+        The bounds for the integration. If None, defaults to (min(alpha_list), max(alpha_list)).
+    plot : bool, optional
+        If True, plots a 3D graph integrand function for each component during optimization.
 
-    Returns:
+    Returns
     -------
     tuple[list[float], list[tuple[float, float]]]
         The optimized parameters (pi_list, phi_list) after hierarchical mixture optimization.
@@ -624,16 +638,20 @@ def hmix_func(
             or not all(isinstance(lst, list) for lst in theta)
             or num_clusters != len(theta[0])
         ):
-            raise ValueError(
-                "theta must be a tuple of two lists with the same length as num_clusters."
-            )
+            raise ValueError("Θ must be a tuple of two lists with the same length as num_clusters.")
 
-    print("\n" + "=" * 30 + "Starting Hierarchical Mixture Optimization" + "=" * 30 + "\n")
+    print(
+        "\033[93m"
+        + "=" * 30
+        + "Starting Hierarchical Mixture Optimization"
+        + "=" * 30
+        + "\n\033[0m"
+    )
     pi_list, phi_list = copy.deepcopy(theta)
     print(
-        f"INITIAL PARAMETERS:\n"
+        f"\033[1mINITIAL PARAMETERS:\n\033[0m"
         f"π={[round(float(pi), 3) for pi in pi_list]}\n"
-        f"ϕ={[(round(float(mu), 3), round(float(sigma), 3)) for mu, sigma in phi_list]}"
+        f"ϕ={[(round(float(mu), 3), round(float(sigma), 3)) for mu, sigma in phi_list]}\n"
     )
 
     # Validate inputs
@@ -652,20 +670,23 @@ def hmix_func(
 
         h_theta_t = h_theta(alpha_list, (pi_list, phi_list), bounds_int)
 
-        if DEBUG:
-            print(
-                f"Iteration {t}: h(theta) = {h_theta_t:.8f}, h(theta_t1) = {h_theta_t1:.8f}"
-                f" with: \nπ={[round(float(pi), 3) for pi in pi_list]}, ϕ="
-                f"{[(round(float(mu), 3), round(float(sigma), 3)) for mu, sigma in phi_list]}"
-                f", bounds=({lower:.3f}, {higher:.3f})"
-            )
-            print("-" * 70 + "\n")
+        print(
+            "\033[95m" + f"Iteration {t}\033[0m: h(Θ) = {h_theta_t:.8f}, h(Θ_t1) = {h_theta_t1:.8f}"
+            f" with: \nπ={[round(float(pi), 3) for pi in pi_list]}\nϕ="
+            f"{[(round(float(mu), 3), round(float(sigma), 3)) for mu, sigma in phi_list]}\n"
+            f"bounds=({lower:.3f}, {higher:.3f})"
+        )
+        print("-" * 70 + "\n")
 
         if abs(h_theta_t - h_theta_t1) <= threshold:
+            print("\033[92m=" * 30 + "CONVERGENCE REACHED" + "=" * 30 + "\n\033[0m")
             print(
-                f"Convergence reached at iteration {t} with h(theta) = {h_theta_t:.6f} "
-                f"and h(theta_t-1) = {h_theta_t1:.6f}. Stopping optimization.\n"
+                f"Iteration {t} with Δh(Θ)={h_theta_t - h_theta_t1:.8f}\n"
+                f"\033[1mFINAL PARAMETERS:\n\033[0m"
+                f"π={[round(float(pi), 3) for pi in pi_list]} \nϕ="
+                f"{[(round(float(mu), 3), round(float(sigma), 3)) for mu, sigma in phi_list]}.\n"
             )
+            print("=" * 79 + "\n")
 
             return pi_list, phi_list
 
@@ -682,13 +703,11 @@ def hmix_func(
 
             mu_opt, sigma_opt = optimize_phi_i(i, alpha_list, theta, bounds_arg=bounds_int)
 
-            if DEBUG:
-                print("\n" + "-" * 70)
-                print(
-                    f"Optimization result for component {i}: μ_opt={mu_opt:.3f}, "
-                    f"σ_opt={sigma_opt:.3f}"
-                )
-                print("-" * 70 + "\n")
+            print("-" * 70)
+            print(
+                f"Optimization result for component {i}: μ_opt={mu_opt:.3f}, σ_opt={sigma_opt:.3f}"
+            )
+            print("-" * 70 + "\n")
 
             # Update the phi parameters for i-th component
             phi_list[i] = (mu_opt, sigma_opt)
@@ -745,7 +764,7 @@ def hmix_func(
         for i in range(num_clusters):
             try:
                 pi_list[i] = optimize_pi_i(i, alpha_list, theta, phi_list, bounds_int)
-                print(f"Optimized pi_i for component {i}: {pi_list[i]:.6f}\n")
+                print(f"Optimized π_{i}: {pi_list[i]:.6f}\n")
             except ZeroDivisionError as e:
                 print(f"ZeroDivisionError during optimization of pi_i for component {i}: {e}")
                 pi_list[i] = 0.0
@@ -753,9 +772,10 @@ def hmix_func(
 
         total = sum(pi_list)
         if not np.isclose(total, 1.0):
-            print("=" * 30 + "Warning!!!" + "=" * 30 + "\n")
-            print(f"Mixing coefficients do not sum to 1. Normalizing: {total:.3f}")
-            print(f"Before normalization: π={[float(pi) for pi in pi_list]}")
+            print("\033[91m" + "=" * 30 + "Warning!!!" + "=" * 30 + "\n\033[0m")
+            print(f"Mixing coefficients do not (exactly) sum to 1. Normalizing: {total:.3f}")
+            print(f"Before normalization: π={[round(float(pi), 5) for pi in pi_list]}" + "\n")
+            print("\033[91m" + "=" * 70 + "\n\033[0m")
             pi_list = [pi / total for pi in pi_list]
 
         # Update the parameters for the next iteration
@@ -764,7 +784,7 @@ def hmix_func(
         t += 1
 
         if t == max_iter:
-            print("=" * 30 + "Warning!!!" + "=" * 30 + "\n")
+            print("\033[91m" + "=" * 30 + "Warning!!!" + "=" * 30 + "\n\033[0m")
             print(f"Maximum iterations {max_iter} reached without convergence.\n")
             print(
                 f"Final parameters: π={[float(pi) for pi in pi_list]}, "
@@ -773,14 +793,12 @@ def hmix_func(
 
             return pi_list, phi_list
 
-    print("=" * 32 + "RESULTS" + "=" * 32 + "\n")
-    print(
-        f"Converged after {t} iterations with h(theta) = "
-        f"{h_theta_t} and h(theta_t-1) = {h_theta_t1}\n"
-    )
+    print("\033[93m" + "=" * 32 + "RESULTS" + "=" * 32 + "\n\033[0m")
+    print(f"Converged after {t} iterations with h(Θ) = {h_theta_t} and h(Θ_t-1) = {h_theta_t1}\n")
     print(
         f"Final parameters: π={[float(pi) for pi in pi_list]}, "
         f"ϕ={[(float(mu), float(sigma)) for mu, sigma in phi_list]}\n"
     )
+    print("=" * 71 + "\n")
 
     return pi_list, phi_list
