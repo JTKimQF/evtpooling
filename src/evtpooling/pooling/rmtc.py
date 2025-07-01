@@ -5,6 +5,7 @@ import pandas as pd
 from scipy.integrate import fixed_quad
 from scipy.stats import norm
 
+from evtpooling.constants import DEBUG
 from evtpooling.utils import calculate_alpha_var, get_alpha_dict
 
 from .hmix import hmix_func, non_parametric_density, precompute_bandwidths, precompute_pdf_matrix
@@ -151,9 +152,12 @@ def rmtc_pooling(
         norm_k = np.sum(np.abs(flatten_beta(beta_k)))
         norm_k1 = np.sum(np.abs(flatten_beta(beta_k1)))
         tau = (norm_k1 - norm_k) / (p ** (1 / 2))
-        print(
-            f"tau_p_k={tau:.6f} for p={p} dimensions with norm_k={norm_k} and norm_k1={norm_k1}.\n"
-        )
+
+        if DEBUG:
+            print(
+                f"tau_p_k={tau:.6f} for p={p} dimensions with norm_k={norm_k} "
+                f"and norm_k1={norm_k1}.\n"
+            )
 
         return tau
 

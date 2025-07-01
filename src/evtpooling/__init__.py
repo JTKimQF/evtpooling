@@ -7,4 +7,5 @@ __version__ = "0.1.0"
 from .alpha import *
 from .constants import *
 from .etl import *
+from .evaluation import *
 from .pooling import *

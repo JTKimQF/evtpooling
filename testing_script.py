@@ -4,9 +4,11 @@ from evtpooling import (
     alpha_var_agg_plot,
     alpha_var_sing_plot,
     autocorrelation_test,
+    basel_backtesting,
     chenzhou,
     etl_pipeline,
     get_alpha_dict,
+    get_var_dict,
     kmeans_plot,
     kmeans_pooling,
     loss_return_plot,
@@ -26,6 +28,7 @@ losses_week, losses_day = etl_pipeline(
     return_day_data=True,
     save_file=True,
 )
+
 
 # === Dictionary for gvkey to company name mapping ===
 dict_gvkey_conm = {
@@ -120,16 +123,22 @@ normality_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
 autocorrelation_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
 stationarity_test(losses_day, drop=True, dict_gvkey_conm=dict_gvkey_conm)
 
+losses_week_est = losses_week[losses_week.index <= "2018-12-31"]
+losses_day_est = losses_day[losses_day.index <= "2018-12-31"]
+
+losses_week_eval = losses_week[losses_week.index > "2018-12-31"]
+losses_day_eval = losses_day[losses_day.index > "2018-12-31"]
+
 
 # === Losses dictionaries ===
-losses_week_dict = {col: losses_week[col].dropna() for col in losses_week.columns}
-losses_day_dict = {col: losses_day[col].dropna() for col in losses_day.columns}
+losses_week_dict = {col: losses_week_est[col].dropna() for col in losses_week_est.columns}
+losses_day_dict = {col: losses_day_est[col].dropna() for col in losses_day_est.columns}
 
 
 # === Alpha & VaR Plots ===
-k_thresh = 80
+k_thresh = 60
 alpha_var_agg_plot(
-    losses=losses_week,
+    losses=losses_week_est,
     k_values=np.arange(10, 150, 2),
     vline=k_thresh,
     threshold=0.99,
@@ -137,25 +146,25 @@ alpha_var_agg_plot(
     details_on=True,
 )
 alpha_var_agg_plot(
-    losses=losses_day,
-    k_values=np.arange(10, 600, 2),
-    vline=400,
+    losses=losses_day_est,
+    k_values=np.arange(10, 400, 2),
+    vline=250,
     threshold=0.99,
     dict_gvkey_conm=dict_gvkey_conm,
     details_on=True,
 )
 alpha_var_sing_plot(
-    losses=losses_week[(63590, "EUR", "01W")],
-    k_values=np.arange(10, 150, 2),
+    losses=losses_week_est[(63590, "EUR", "01W")],
+    k_values=np.arange(10, 100, 2),
     name=dict_gvkey_conm[15509],
 )
 loss_return_plot(
-    losses=losses_day, dict_gvkey_conm=dict_gvkey_conm, plots_per_batch=16, num_columns=4
+    losses=losses_week, dict_gvkey_conm=dict_gvkey_conm, plots_per_batch=16, num_columns=4
 )
 
 
 # === Common tail index testing ===
-alpha_dict = get_alpha_dict(losses_week, k_threshold=k_thresh)
+alpha_dict = get_alpha_dict(losses_week_est, k_threshold=k_thresh)
 alpha_list = list(alpha_dict.values())
 mean_alpha = np.mean(alpha_list)
 
@@ -163,7 +172,7 @@ chenzou_stat, chenzou_p_value = chenzhou(
     alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
 )
 wald_stat, wald_p_value = wald_test(
-    losses=losses_week, alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
+    losses=losses_week_est, alpha_list=alpha_list, common_alpha=mean_alpha, k_threshold=k_thresh
 )
 
 print(f"Chenzhou statistic: {chenzou_stat}, p-value: {chenzou_p_value}")
@@ -171,20 +180,63 @@ print(f"Wald statistic: {wald_stat}, p-value: {wald_p_value}")
 
 
 # === KMeans Clustering ===
-df_pooling_kmeans = kmeans_pooling(losses=losses_week, k_threshold=80, num_clusters=4)
+df_pooling_kmeans = kmeans_pooling(losses=losses_week_est, k_threshold=k_thresh, num_clusters=4)
+kmeans_var_dict = {
+    index: value
+    for index, value in zip(df_pooling_kmeans.index, df_pooling_kmeans["kmeans_var"], strict=False)
+}
 print(df_pooling_kmeans.iloc[:, :])
 
-kmeans_plot(losses=losses_week, k_threshold=80, k_range=np.arange(1, 15), plot_inertia=True)
+kmeans_plot(
+    losses=losses_week_est, k_threshold=k_thresh, k_range=np.arange(1, 10), plot_inertia=True
+)
 
 
 # === RMTC Clustering ===
 df_pooling_rmtc, beta_list = rmtc_pooling(
-    losses=losses_week,
-    k_threshold=80,
-    beta=([0.5, 0.5], [(1.5, 0.5), (2.5, 1.0)]),
+    losses=losses_week_est,
+    k_threshold=k_thresh,
+    beta=([0.4, 0.4, 0.2], [(1.9, 0.2), (2.3, 0.3), (3.0, 0.5)]),
     threshold=1e-4,
     max_iter=50,
 )
+rmtc_var_dict = {
+    index: value
+    for index, value in zip(df_pooling_rmtc.index, df_pooling_rmtc["rmtc_var"], strict=False)
+}
 print("RMC Estimated parameters:\n")
 print(df_pooling_rmtc.iloc[:, :], "\n")
-print(f"Estimated parameters:\n{beta_list[-2]}")
+print(
+    f"Estimated parameters:\n"
+    f"π={[round(float(pi), 3) for pi in beta_list[-2][0]]}\n"
+    f"ϕ={[(round(float(mu), 3), round(float(sigma), 3)) for mu, sigma in beta_list[-2][1]]}"
+)
+
+
+# === Backtesting ===
+losses_week_eval.columns = [col[0] for col in losses_week_eval.columns]
+
+df_backtesting_non_pooling = basel_backtesting(
+    losses=losses_week_eval,
+    var_dict=get_var_dict(losses_week_est, k_threshold=k_thresh),
+    confidence=0.99,
+)
+df_backtesting_non_pooling.rename(index=dict_gvkey_conm, inplace=True)
+print("Backtesting results non-pooling:")
+print(df_backtesting_non_pooling.iloc[:, :], "\n")
+
+
+df_backtesting_kmeans = basel_backtesting(
+    losses=losses_week_eval, var_dict=kmeans_var_dict, confidence=0.99
+)
+df_backtesting_kmeans.rename(index=dict_gvkey_conm, inplace=True)
+print("Backtesting results KMeans:")
+print(df_backtesting_kmeans.iloc[:, :], "\n")
+
+
+df_backtesting_rmtc = basel_backtesting(
+    losses=losses_week_eval, var_dict=rmtc_var_dict, confidence=0.99
+)
+df_backtesting_rmtc.rename(index=dict_gvkey_conm, inplace=True)
+print("Backtesting results RMTC:")
+print(df_backtesting_rmtc.iloc[:, :], "\n")
