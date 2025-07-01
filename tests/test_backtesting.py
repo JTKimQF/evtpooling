@@ -1,8 +1,9 @@
+import numpy as np
 import pandas as pd
 import pytest
 from scipy.stats import uniform
 
-from evtpooling import basel_backtesting
+from evtpooling import basel_backtesting, sener_backtesting
 
 # --------------------
 # Fixtures (mock data)
@@ -36,6 +37,27 @@ def basel_backtesting_data():
     return df_losses, var_dict
 
 
+@pytest.fixture
+def sener_backtesting_data():
+    losses_col = [
+        (1, "EUR", "01W"),
+        (2, "EUR", "01W"),
+        (3, "EUR", "01W"),
+    ]
+
+    var_dict = {col: var for col, var in zip(losses_col, [10, 10, 10], strict=False)}
+
+    df_losses = pd.DataFrame(
+        {
+            losses_col[0]: [11, 5, 12, 12, 10],
+            losses_col[1]: [6, 7, 8, 9, 10],
+            losses_col[2]: [11, 11, 12, 10, 15],
+        }
+    )
+
+    return df_losses, var_dict
+
+
 # --------------------
 # Tests
 # --------------------
@@ -59,3 +81,13 @@ def test_basel_backtesting(basel_backtesting_data):
             assert row["zone"] == "yellow"
         else:
             assert row["zone"] == "red"
+
+
+def test_sener_backtesting(sener_backtesting_data):
+    df_losses, var_dict = sener_backtesting_data
+    vio_df = sener_backtesting(df_losses, var_dict, theta=0.5)
+
+    assert vio_df.shape[0] == len(var_dict)
+    assert np.array_equal(vio_df["violation_penalty"].values, [8.5, 0, 17.75])
+    assert np.array_equal(vio_df["safe_penalty"].values, [5, 10, 0])
+    assert np.array_equal(vio_df["agg_penalty"].values, [6.75, 5, 8.875])

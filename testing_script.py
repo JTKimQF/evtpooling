@@ -14,6 +14,7 @@ from evtpooling import (
     loss_return_plot,
     normality_test,
     rmtc_pooling,
+    sener_backtesting,
     stationarity_test,
     wald_test,
 )
@@ -240,3 +241,28 @@ df_backtesting_rmtc = basel_backtesting(
 df_backtesting_rmtc.rename(index=dict_gvkey_conm, inplace=True)
 print("Backtesting results RMTC:")
 print(df_backtesting_rmtc.iloc[:, :], "\n")
+
+
+# === Sener backtesting ===
+df_sener_backtesting_non_pooling = sener_backtesting(
+    losses=losses_week_eval, var_dict=get_var_dict(losses_week_est, k_threshold=k_thresh), theta=0.5
+)
+df_sener_backtesting_non_pooling.rename(index=dict_gvkey_conm, inplace=True)
+print("Sener backtesting results non-pooling:")
+print(df_sener_backtesting_non_pooling.iloc[:, :], "\n")
+
+
+df_sener_backtesting_kmeans = sener_backtesting(
+    losses=losses_week_eval, var_dict=kmeans_var_dict, theta=0.5
+)
+df_sener_backtesting_kmeans.rename(index=dict_gvkey_conm, inplace=True)
+print("Sener backtesting results KMeans:")
+print(df_sener_backtesting_kmeans.iloc[:, :], "\n")
+
+
+df_sener_backtesting_rmtc = sener_backtesting(
+    losses=losses_week_eval, var_dict=rmtc_var_dict, theta=0.5
+)
+df_sener_backtesting_rmtc.rename(index=dict_gvkey_conm, inplace=True)
+print("Sener backtesting results RMTC:")
+print(df_sener_backtesting_rmtc.iloc[:, :], "\n")

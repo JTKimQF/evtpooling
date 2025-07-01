@@ -128,6 +128,7 @@ ignore = ["E203", "S101", "S301"]
 "rmtc.py" = ["C901"]
 "test_backtesting.py" = ["C416"]
 "testing_script.py" = ["C416"]
+"backtesting.py" = ["C901"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
