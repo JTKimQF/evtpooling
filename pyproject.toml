@@ -14,7 +14,8 @@ maintainers = [
   { name = "J.T. Kim", email = "567233jk@eur.nl" }
 ]
 classifiers = []
-license = { text = "Not open source" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 dependencies = [
   "pandas",
