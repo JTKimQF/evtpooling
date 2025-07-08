@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from scipy.stats import uniform
 
-from evtpooling import basel_backtesting, sener_backtesting
+from evtpooling import basel_backtesting, dm_test, sener_backtesting
 
 # --------------------
 # Fixtures (mock data)
@@ -58,6 +58,28 @@ def sener_backtesting_data():
     return df_losses, var_dict
 
 
+@pytest.fixture
+def dm_test_data():
+    losses_col = [
+        (1, "EUR", "01W"),
+        (2, "EUR", "01W"),
+        (3, "EUR", "01W"),
+    ]
+
+    df_losses = pd.DataFrame(
+        {
+            losses_col[0]: [5, 7, 7, 7, 7],
+            losses_col[1]: [1, 2, 3, 4, 5],
+            losses_col[2]: [4, 4, 4, 4, 4],
+        }
+    )
+
+    var_dict1 = {col: var for col, var in zip(losses_col, [5.0, 5.0, 5.0], strict=False)}
+    var_dict2 = {col: var for col, var in zip(losses_col, [4.0, 4.0, 4.0], strict=False)}
+
+    return df_losses, var_dict1, var_dict2
+
+
 # --------------------
 # Tests
 # --------------------
@@ -91,3 +113,20 @@ def test_sener_backtesting(sener_backtesting_data):
     assert np.array_equal(vio_df["violation_penalty"].values, [8.5, 0, 17.75])
     assert np.array_equal(vio_df["safe_penalty"].values, [5, 10, 0])
     assert np.array_equal(vio_df["agg_penalty"].values, [6.75, 5, 8.875])
+
+
+def test_dm_test(dm_test_data):
+    df_losses, var_dict1, var_dict2 = dm_test_data
+    result = dm_test(df_losses, var_dict1, var_dict2)
+
+    # Check the result DataFrame structure
+    assert isinstance(result, pd.DataFrame)
+    assert len(result) == len(var_dict1)
+    assert "DM_stat" in result.columns
+    assert "p_value" in result.columns
+
+    # Check the values of the DM statistic and p-value
+    assert np.array_equal(result["differential_mean"], [-4.2, 0.6, 1])
+    assert np.allclose(result["differential_std"], [1.789, 0.894, 0.0])
+    assert np.allclose(result["DM_stat"], [-2.348, 0.671, float("inf")])
+    assert np.allclose(result["p_value"], [0.991, 0.251, 0.0])

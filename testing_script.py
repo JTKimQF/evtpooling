@@ -6,6 +6,7 @@ from evtpooling import (
     autocorrelation_test,
     basel_backtesting,
     chenzhou,
+    dm_test,
     etl_pipeline,
     get_alpha_dict,
     get_var_dict,
@@ -266,3 +267,32 @@ df_sener_backtesting_rmtc = sener_backtesting(
 df_sener_backtesting_rmtc.rename(index=dict_gvkey_conm, inplace=True)
 print("Sener backtesting results RMTC:")
 print(df_sener_backtesting_rmtc.iloc[:, :], "\n")
+
+
+# === Diebold-Mariano test ===
+kmeans_dm_test = dm_test(
+    losses=losses_week_eval,
+    var_dict1=get_var_dict(losses_week_est, k_threshold=k_thresh),
+    var_dict2=kmeans_var_dict,
+)
+kmeans_dm_test.rename(index=dict_gvkey_conm, inplace=True)
+print("Diebold-Mariano test results (non-pooling vs KMeans):")
+print(kmeans_dm_test.iloc[:, :], "\n")
+
+rmtc_dm_test = dm_test(
+    losses=losses_week_eval,
+    var_dict1=get_var_dict(losses_week_est, k_threshold=k_thresh),
+    var_dict2=rmtc_var_dict,
+)
+rmtc_dm_test.rename(index=dict_gvkey_conm, inplace=True)
+print("Diebold-Mariano test results (non-pooling vs RMTC):")
+print(rmtc_dm_test.iloc[:, :], "\n")
+
+kmeans_rmtc_dm_test = dm_test(
+    losses=losses_week_eval,
+    var_dict1=kmeans_var_dict,
+    var_dict2=rmtc_var_dict,
+)
+kmeans_rmtc_dm_test.rename(index=dict_gvkey_conm, inplace=True)
+print("Diebold-Mariano test results (KMeans vs RMTC):")
+print(kmeans_rmtc_dm_test.iloc[:, :], "\n")
