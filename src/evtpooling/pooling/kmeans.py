@@ -57,7 +57,11 @@ def kmeans_clustering(
 
 
 def kmeans_plot(
-    losses: pd.DataFrame, k_threshold: int, k_range: np.ndarray, plot_inertia: bool = False
+    losses: pd.DataFrame,
+    k_threshold: int,
+    k_range: np.ndarray,
+    plot_inertia: bool = False,
+    axis_title: bool = True,
 ) -> None:
     """
     For each k in k_range, perform KMeans clustering on the 1D loss data
@@ -112,13 +116,17 @@ def kmeans_plot(
     ax.set_xlim(data.min() - 0.1, data.max() + 0.1)
     ax.tick_params(axis="x", labelsize=16)
     ax.tick_params(axis="y", labelsize=16)
-    ax.set_ylim(-0.5, 0.5)
+    # ax.set_ylim(-0.5, 0.5)
+    ax.set_yticklabels([])  # Removes the y-axis tick labels
+    ax.tick_params(axis="y", length=0)  # Optionally hides the tick lines too
 
     current_index = 0
 
     def update_plot(idx):
         k, labels, centroids = clustering_results[idx]
-        ax.set_title(f"KMeans Clustering (k = {k})", fontsize=16)
+
+        if axis_title:
+            ax.set_title(f"KMeans Clustering (k = {k})", fontsize=16)
 
         for i in range(max_k):
             if i < k:

@@ -126,7 +126,7 @@ def test_dm_test(dm_test_data):
     assert "p_value" in result.columns
 
     # Check the values of the DM statistic and p-value
-    assert np.array_equal(result["differential_mean"], [-4.2, 0.6, 1])
-    assert np.allclose(result["differential_std"], [1.789, 0.894, 0.0])
-    assert np.allclose(result["DM_stat"], [-2.348, 0.671, float("inf")])
-    assert np.allclose(result["p_value"], [0.991, 0.251, 0.0])
+    assert np.array_equal(result["differential_mean"], [1, 0.6, -4.2])
+    assert np.allclose(result["differential_std"], [0.0, 0.894, 1.789])
+    assert np.allclose(result["DM_stat"], [float("inf"), 0.671, -2.348])
+    assert np.allclose(result["p_value"], [0.0, 0.251, 0.991])
