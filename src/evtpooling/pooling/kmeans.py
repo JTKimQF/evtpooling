@@ -10,7 +10,11 @@ from evtpooling.utils import calculate_alpha_var, get_alpha_dict
 
 
 def kmeans_clustering(
-    losses: pd.DataFrame, k_threshold: int, k_range: np.ndarray, plot_inertia: bool = False
+    losses: pd.DataFrame,
+    k_threshold: int,
+    k_range: np.ndarray,
+    plot_inertia: bool = False,
+    axis_title: bool = True,
 ) -> None:
     """
     Perform KMeans clustering on the 1D loss data and plot the inertia for each k value.
@@ -46,11 +50,13 @@ def kmeans_clustering(
             x=k_range, y=intertias, kind="line", linestyle="-", marker="o", height=8, aspect=1.5
         )
         ax = g.ax
-        ax.set_xlabel("Number of Clusters (k)", fontsize=14)
-        ax.set_ylabel("Inertia", fontsize=14)
-        ax.set_title("KMeans Inertia vs Number of Clusters", fontsize=16)
-        ax.tick_params(axis="x", labelsize=12)
-        ax.tick_params(axis="y", labelsize=12)
+        ax.set_xlabel("Number of Clusters (k)", fontsize=18)
+        ax.set_ylabel("Inertia", fontsize=18)
+
+        if axis_title:
+            ax.set_title("KMeans Inertia vs Number of Clusters", fontsize=18)
+        ax.tick_params(axis="x", labelsize=16)
+        ax.tick_params(axis="y", labelsize=16)
         ax.set_xticks(k_range)
         plt.tight_layout()
         plt.show()
@@ -113,10 +119,15 @@ def kmeans_plot(
         scatter_plots.append(scatter)
         centroid_plots.append(centroid)
 
-    ax.set_xlim(data.min() - 0.1, data.max() + 0.1)
+    tick_start = np.floor(data.min() * 4) / 4
+    tick_end = np.ceil(data.max() * 4) / 4
+
+    ax.set_xlim(tick_start, tick_end)
+    ax.set_xticks(np.arange(tick_start, tick_end + 0.25, 0.25))
     ax.tick_params(axis="x", labelsize=16)
     ax.tick_params(axis="y", labelsize=16)
-    # ax.set_ylim(-0.5, 0.5)
+    ax.set_ylim(-0.5, 0.5)
+    ax.set_yticks(np.arange(-0.5, 0.5, 0.5))
     ax.set_yticklabels([])  # Removes the y-axis tick labels
     ax.tick_params(axis="y", length=0)  # Optionally hides the tick lines too
 
@@ -155,7 +166,11 @@ def kmeans_plot(
     plt.show(block=False)  # Keep last figure open until user closes it
 
     kmeans_clustering(
-        losses=losses, k_threshold=k_threshold, k_range=k_range, plot_inertia=plot_inertia
+        losses=losses,
+        k_threshold=k_threshold,
+        k_range=k_range,
+        plot_inertia=plot_inertia,
+        axis_title=axis_title,
     )
 
 

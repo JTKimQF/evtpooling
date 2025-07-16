@@ -29,7 +29,7 @@ EXPECTED_COLUMNS = [
 ]
 EXPECTED_COL_TYPES = {
     "gvkey": np.integer,
-    "iid": np.object_,
+    "iid": (np.object_, np.integer),
     "datadate": np.datetime64,
     "conm": np.object_,
     "curcdd": np.object_,
@@ -40,8 +40,8 @@ EXPECTED_COL_TYPES = {
     "trfd": np.floating,
     "isin": np.object_,
     "costat": np.object_,
-    "ggroup": np.floating,
-    "gind": np.floating,
+    "ggroup": (np.floating, np.integer),
+    "gind": (np.floating, np.integer),
     "loc": np.object_,
 }
 IDENTIFIER_COLUMNS = ["gvkey", "curcdd", "iid"]

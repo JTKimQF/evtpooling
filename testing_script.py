@@ -150,7 +150,7 @@ alpha_var_agg_plot(
     k_values=np.arange(10, 150, 2),
     vline=k_thresh,
     threshold=0.99,
-    dict_gvkey_conm=dict_gvkey_conm, 
+    dict_gvkey_conm=dict_gvkey_conm,
     details_on=False,
 )
 alpha_var_agg_plot(

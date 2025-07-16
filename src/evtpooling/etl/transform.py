@@ -46,11 +46,21 @@ def validate_data(
     df.columns = df.columns.str.lower()  # Normalize column names to lowercase
 
     for col, expected_type in expected_col_types.items():
-        if not np.issubdtype(df[col].dtype, expected_type):
-            raise TypeError(
-                f"Column {col} has wrong dtype: \
-                            {df[col].dtype}, expected {expected_type}"
-            )
+        if col not in df.columns:
+            continue
+
+        actual_dtype = df[col].dtype
+
+        if isinstance(expected_type, tuple):
+            if not any(np.issubdtype(actual_dtype, t) for t in expected_type):
+                raise TypeError(
+                    f"Column '{col}' has dtype {actual_dtype}, expected one of {expected_type}"
+                )
+        else:
+            if not np.issubdtype(actual_dtype, expected_type):
+                raise TypeError(
+                    f"Column '{col}' has dtype {actual_dtype}, expected {expected_type}"
+                )
 
     print("✅ Data validation passed.")
 
