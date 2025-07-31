@@ -45,7 +45,7 @@ def basel_backtesting(
         std_dev = np.sqrt(num_observations * threshold * (1 - threshold))
 
         green_zone_num = int(norm.ppf(0.95) * std_dev + mean)
-        red_zone_num = int(norm.ppf(0.99) * std_dev + mean)
+        red_zone_num = int(norm.ppf(0.9999) * std_dev + mean)
 
         if violation_count <= green_zone_num:
             return "green"
