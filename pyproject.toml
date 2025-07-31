@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evtpooling"
-version = "0.3.1"
+version = "0.3.2"
 description = "evtpooling contains the framework needed to improve tail risk forecasts"
 readme = "README.rst"
 authors = [
@@ -72,7 +72,7 @@ branch = true
 source = ["evtpooling"]
 
 [tool.bumpversion]
-current_version = "0.2.1"
+current_version = "0.3.2"
 commit = true
 tag = true
 

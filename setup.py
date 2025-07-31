@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="evtpooling",
-    version="0.3.1",
+    version="0.3.2",
     author="J.T. Kim",
     description="evtpooling contains the framework needed to improve tail risk forecasts",
     package_dir={"": "src"},

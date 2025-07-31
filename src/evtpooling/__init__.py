@@ -2,7 +2,7 @@
 
 __author__ = """J.T. Kim"""
 __email__ = "567233jk@eur.nl"
-__version__ = "0.1.0"
+__version__ = "0.3.2"
 
 from .alpha import *
 from .constants import *
